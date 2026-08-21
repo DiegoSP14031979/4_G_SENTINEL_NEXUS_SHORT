@@ -1,7 +1,9 @@
 import os
+import time
 import smtplib
 from email.mime.text import MIMEText
 from google import genai
+from google.genai.errors import APIError
 import requests
 
 GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")
@@ -9,17 +11,18 @@ EMAIL_ORIGEN = os.environ.get("EMAIL_ORIGEN")
 EMAIL_PASSWORD = os.environ.get("EMAIL_PASSWORD")
 EMAIL_DESTINO = os.environ.get("EMAIL_DESTINO")
 
-# Criptomonedas de alto volumen y volatilidad en Coinbase
 CRIPTOS = ["bitcoin", "ethereum", "solana", "avalanche-2", "chainlink", "near", "render-token"]
 
 def obtener_datos_coinbase():
     ids = ",".join(CRIPTOS)
     url = f"https://api.coingecko.com/api/v3/simple/price?ids={ids}&vs_currencies=usd&include_24hr_vol=true&include_24hr_change=true"
+    headers = {"User-Agent": "Mozilla/5.0"}
     try:
-        res = requests.get(url)
+        res = requests.get(url, headers=headers, timeout=10)
+        res.raise_for_status()
         return res.json()
     except Exception as e:
-        print("Error obteniendo datos:", e)
+        print("Error obteniendo datos de mercado:", e)
         return {}
 
 def analizar_oportunidades(datos):
@@ -49,11 +52,22 @@ def analizar_oportunidades(datos):
     Si el mercado está plano o sin oportunidades claras, indica: "MERCADO SIN SEÑALES DE CORTO PLAZO".
     """
     
-    response = client.models.generate_content(
-        model='gemini-3.6-flash',
-        contents=prompt,
-    )
-    return response.text
+    # Modelos a intentar en orden de preferencia
+    modelos = ['gemini-2.5-flash', 'gemini-2.0-flash']
+    
+    for modelo in modelos:
+        for intento in range(3):
+            try:
+                response = client.models.generate_content(
+                    model=modelo,
+                    contents=prompt,
+                )
+                return response.text
+            except APIError as e:
+                print(f"Intento {intento + 1} con {modelo} falló por sobrecarga: {e}")
+                time.sleep(5)  # Espera 5 segundos antes de reintentar
+    
+    raise Exception("No se pudo completar el análisis tras varios intentos por saturación de la API.")
 
 def enviar_correo(texto):
     msg = MIMEText(texto, 'plain', 'utf-8')
