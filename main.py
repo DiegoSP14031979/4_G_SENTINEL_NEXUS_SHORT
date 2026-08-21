@@ -52,8 +52,8 @@ def analizar_oportunidades(datos):
     Si el mercado está plano o sin oportunidades claras, indica: "MERCADO SIN SEÑALES DE CORTO PLAZO".
     """
     
-    # Modelos a intentar en orden de preferencia
-    modelos = ['gemini-2.5-flash', 'gemini-2.0-flash']
+    # Reemplaza la lista de modelos dentro de analizar_oportunidades por:
+    modelos = ['gemini-3.6-flash']
     
     for modelo in modelos:
         for intento in range(3):
