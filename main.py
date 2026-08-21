@@ -22,7 +22,7 @@ def obtener_datos_coinbase():
         return {}
 
 def analizar_oportunidades(datos):
-    genai.configure(api_key=GEMINI_API_KEY)
+    model = genai.GenerativeModel('gemini-2.0-flash')
     # Actualizado al modelo estándar compatible
     model = genai.GenerativeModel('gemini-2.5-flash')
     
