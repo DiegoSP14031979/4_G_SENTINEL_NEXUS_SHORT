@@ -1,0 +1,30 @@
+name: Agente Cripto Automatico
+
+on:
+  schedule:
+    - cron: '0 */12 * * *'  # Ejecución cada 12 horas
+  workflow_dispatch:        # Permite probarlo manualmente
+
+jobs:
+  ejecutar-agente:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Descargar código
+        uses: actions/checkout@v3
+
+      - name: Configurar Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Instalar librerías
+        run: |
+          pip install requests google-generativeai
+
+      - name: Ejecutar Agente
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          EMAIL_ORIGEN: ${{ secrets.EMAIL_ORIGEN }}
+          EMAIL_PASSWORD: ${{ secrets.EMAIL_PASSWORD }}
+          EMAIL_DESTINO: ${{ secrets.EMAIL_DESTINO }}
+        run: python main.py
