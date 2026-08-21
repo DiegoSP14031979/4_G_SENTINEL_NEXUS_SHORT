@@ -1,5 +1,4 @@
-YAML
-name: agente-cripto
+name: Agente Cripto Automatico
 
 on:
   schedule:
