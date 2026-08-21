@@ -24,7 +24,6 @@ def obtener_datos_coinbase():
         return {}
 
 def analizar_oportunidades(datos):
-    # Inicialización con el nuevo SDK oficial
     client = genai.Client(api_key=GEMINI_API_KEY)
     
     prompt = f"""
@@ -51,9 +50,8 @@ def analizar_oportunidades(datos):
     Si el mercado está plano o sin oportunidades claras, indica: "MERCADO SIN SEÑALES DE CORTO PLAZO".
     """
     
-    # Generación de contenido con gemini-2.5-flash
     response = client.models.generate_content(
-        model='gemini-2.5-flash',
+        model='gemini-2.0-flash',
         contents=prompt,
     )
     return response.text
@@ -73,4 +71,3 @@ if __name__ == "__main__":
     if datos:
         informe = analizar_oportunidades(datos)
         enviar_correo(informe)
-        
