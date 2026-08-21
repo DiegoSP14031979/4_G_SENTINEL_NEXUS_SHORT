@@ -23,7 +23,8 @@ def obtener_datos_coinbase():
 
 def analizar_oportunidades(datos):
     genai.configure(api_key=GEMINI_API_KEY)
-    model = genai.GenerativeModel('gemini-1.5-flash')
+    # Actualizado al modelo estándar compatible
+    model = genai.GenerativeModel('gemini-2.5-flash')
     
     prompt = f"""
     Actúa como un trader cuantitativo de corto plazo (Day Trading) para operar en Coinbase.
