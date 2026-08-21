@@ -1,7 +1,7 @@
 import os
 import smtplib
 from email.mime.text import MIMEText
-from google import genai
+import google.generativeai as genai
 import requests
 
 GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")
@@ -23,7 +23,9 @@ def obtener_datos_coinbase():
         return {}
 
 def analizar_oportunidades(datos):
-    client = genai.Client(api_key=GEMINI_API_KEY)
+    genai.configure(api_key=GEMINI_API_KEY)
+    # Modelo oficial rápido y estable
+    model = genai.GenerativeModel('gemini-1.5-flash')
     
     prompt = f"""
     Actúa como un trader cuantitativo de corto plazo (Day Trading) para operar en Coinbase.
@@ -48,11 +50,7 @@ def analizar_oportunidades(datos):
     
     Si el mercado está plano o sin oportunidades claras, indica: "MERCADO SIN SEÑALES DE CORTO PLAZO".
     """
-    response = client.models.generate_content(
-        model='gemini-2.5-flash',
-        contents=prompt,
-    )
-    return response.text
+    return model.generate_content(prompt).text
 
 def enviar_correo(texto):
     msg = MIMEText(texto, 'plain', 'utf-8')
