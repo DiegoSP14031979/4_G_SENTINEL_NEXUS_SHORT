@@ -11,48 +11,70 @@ EMAIL_ORIGEN = os.environ.get("EMAIL_ORIGEN")
 EMAIL_PASSWORD = os.environ.get("EMAIL_PASSWORD")
 EMAIL_DESTINO = os.environ.get("EMAIL_DESTINO")
 
-CRIPTOS = ["bitcoin", "ethereum", "solana", "avalanche-2", "chainlink", "near", "render-token"]
+# Criptomonedas estables que debemos ignorar en el escaneo
+STABLECOINS = {"tether", "usd-coin", "first-digital-usd", "dai", "ethena-usde", "usdd", "pyusd", "tether-gold"}
 
-def obtener_datos_coinbase():
-    ids = ",".join(CRIPTOS)
-    url = f"https://api.coingecko.com/api/v3/simple/price?ids={ids}&vs_currencies=usd&include_24hr_vol=true&include_24hr_change=true"
+def obtener_top_mercado_coingecko():
+    # Obtiene las 100 criptomonedas con mayor volumen e impacto de mercado
+    url = "https://api.coingecko.com/api/v3/coins/markets"
+    params = {
+        "vs_currency": "usd",
+        "order": "volume_desc",
+        "per_page": 100,
+        "page": 1,
+        "sparkline": False,
+        "price_change_percentage": "24h"
+    }
     headers = {"User-Agent": "Mozilla/5.0"}
+    
     try:
-        res = requests.get(url, headers=headers, timeout=10)
+        res = requests.get(url, params=params, headers=headers, timeout=15)
         res.raise_for_status()
-        return res.json()
+        datos = res.json()
+        
+        # Filtrado para quedarnos solo con tickers volátiles relevantes
+        monedas_filtradas = []
+        for coin in datos:
+            if coin["id"] not in STABLECOINS:
+                monedas_filtradas.append({
+                    "simbolo": coin["symbol"].upper(),
+                    "nombre": coin["name"],
+                    "precio": coin["current_price"],
+                    "cambio_24h_%": round(coin.get("price_change_percentage_24h") or 0, 2),
+                    "volumen_24h": coin["total_volume"]
+                })
+        return monedas_filtradas[:50]  # Enviamos el Top 50 más activo a la IA
     except Exception as e:
-        print("Error obteniendo datos de mercado:", e)
-        return {}
+        print("Error obteniendo datos masivos del mercado:", e)
+        return []
 
-def analizar_oportunidades(datos):
+def analizar_oportunidades(datos_mercado):
     client = genai.Client(api_key=GEMINI_API_KEY)
     
     prompt = f"""
-    Actúa como un trader cuantitativo de corto plazo (Day Trading) para operar en Coinbase.
+    Actúa como un trader cuantitativo experto en Day Trading y Scalping para Coinbase.
     
-    Analiza la siguiente matriz de precios, cambios en 24h y volumen:
-    {datos}
+    A continuación tienes la lista actualizada de las 50 criptomonedas con mayor volumen de mercado en tiempo real:
+    {datos_mercado}
     
     TAREA:
-    Escanéalas y selecciona ÚNICAMENTE las 1 o 2 mejores oportunidades con mayor potencial de trading a corto plazo.
+    Escanea todo el listado e identifica ÚNICAMENTE las 2 o 3 mejores oportunidades operables.
     
     REGLAS DE SALIDA:
-    Si encuentras una oportunidad clara, genera un informe súper directo con este formato exacto por cada moneda seleccionada:
+    Si detectas configuraciones de alta probabilidad, genera un reporte directo con este formato por cada oportunidad:
     
     🚨 OPORTUNIDAD DE CORTOPLAZO 🚨
-    - Moneda: [Nombre]
-    - Acción: [COMPRAR / VENDER / ESPERAR]
-    - Razón Técnica: [Breve justificación según volatilidad/cambio]
+    - Moneda: [Nombre y Ticker]
+    - Acción: [COMPRAR / VENDER]
+    - Razón Técnica: [Análisis técnico basado en volumen y cambio de %24h]
     - Precio de Entrada Sugerido: $X.XX
     - Stop Loss (Pérdida máx -2%): $X.XX
     - Take Profit (Objetivo +4%): $X.XX
     - Nivel de Riesgo (1 al 10): X
     
-    Si el mercado está plano o sin oportunidades claras, indica: "MERCADO SIN SEÑALES DE CORTO PLAZO".
+    Si el mercado general no muestra patrones claros de entrada, responde únicamente: "MERCADO SIN SEÑALES DE CORTO PLAZO".
     """
     
-    # Reemplaza la lista de modelos dentro de analizar_oportunidades por:
     modelos = ['gemini-3.6-flash']
     
     for modelo in modelos:
@@ -65,13 +87,13 @@ def analizar_oportunidades(datos):
                 return response.text
             except APIError as e:
                 print(f"Intento {intento + 1} con {modelo} falló por sobrecarga: {e}")
-                time.sleep(5)  # Espera 5 segundos antes de reintentar
+                time.sleep(5)
     
-    raise Exception("No se pudo completar el análisis tras varios intentos por saturación de la API.")
+    raise Exception("No se pudo completar el análisis tras varios intentos.")
 
 def enviar_correo(texto):
     msg = MIMEText(texto, 'plain', 'utf-8')
-    msg['Subject'] = "⚡ Alerta Trading Corto Plazo - Coinbase"
+    msg['Subject'] = "⚡ Alerta Trading Masiva - Coinbase"
     msg['From'] = EMAIL_ORIGEN
     msg['To'] = EMAIL_DESTINO
 
@@ -80,7 +102,9 @@ def enviar_correo(texto):
         server.sendmail(EMAIL_ORIGEN, EMAIL_DESTINO, msg.as_string())
 
 if __name__ == "__main__":
-    datos = obtener_datos_coinbase()
-    if datos:
-        informe = analizar_oportunidades(datos)
+    datos_mercado = obtener_top_mercado_coingecko()
+    if datos_mercado:
+        informe = analizar_oportunidades(datos_mercado)
         enviar_correo(informe)
+    else:
+        print("No se pudieron obtener datos del mercado.")
