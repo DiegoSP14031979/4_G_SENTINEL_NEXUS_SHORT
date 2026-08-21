@@ -73,3 +73,4 @@ if __name__ == "__main__":
     if datos:
         informe = analizar_oportunidades(datos)
         enviar_correo(informe)
+        
