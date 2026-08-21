@@ -1,8 +1,8 @@
 name: Agente Cripto Automatico
 
 on:
-  schedule:
-    - cron: '0 */12 * * *'  # Ejecución cada 12 horas
+schedule:
+    - cron: '0 * * * *'  # Se ejecuta automáticamente cada hora
   workflow_dispatch:        # Permite probarlo manualmente
 
 jobs:
