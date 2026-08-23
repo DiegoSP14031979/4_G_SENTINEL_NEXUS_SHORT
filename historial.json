@@ -16,6 +16,10 @@
         {
             "fecha": "2026-08-23T11:46:39.648173Z",
             "saldo": 1000.0
+        },
+        {
+            "fecha": "2026-08-23T13:29:59.684024Z",
+            "saldo": 1000.0
         }
     ],
     "decisiones": [
@@ -38,6 +42,12 @@
             "accion": "MANTENER",
             "resumen": "MANTENER POSICIONES: Todas las posiciones en cartera muestran rendimiento positivo. DOGE descartado por falta de volumen. SAND entra a seguimiento (liquidez < $50k).",
             "fecha": "2026-08-23T11:46:39.648173Z"
+        },
+        {
+            "accion": "COMPRAR",
+            "resumen": "COMPRA SAND: Entrada a $0.0453, asignación dinámica de $600.00 USD basada en un Stop Loss a 2.5% ($0.04417) para arriesgar exactamente $15.00 (1.5%). Ajuste a Break-Even aplicado en XRP y ETH al superar +1.5% neto.",
+            "profit_cerrado_usd": 0.0,
+            "fecha": "2026-08-23T13:29:59.684024Z"
         }
     ]
 }
