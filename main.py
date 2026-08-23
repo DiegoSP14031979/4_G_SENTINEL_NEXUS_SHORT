@@ -32,8 +32,6 @@ def guardar_posiciones(posiciones):
     with open(FILE_POSICIONES, "w", encoding="utf-8") as f:
         json.dump(posiciones, f, indent=4, ensure_ascii=False)
 
-# --- ESCANEO Y PROFUNDIDAD DEL LIBRO DE ÓRDENES (LEVEL 2 ORDER BOOK) ---
-
 def obtener_candidatas_coingecko():
     url = "https://api.coingecko.com/api/v3/coins/markets"
     params = {"vs_currency": "usd", "order": "volume_desc", "per_page": 50, "page": 1, "sparkline": False, "price_change_percentage": "24h"}
@@ -46,10 +44,6 @@ def obtener_candidatas_coingecko():
         return []
 
 def obtener_profundidad_libro_coinbase(symbol):
-    """
-    Consulta directa al Libro de Órdenes Nivel 2 de Coinbase.
-    Calcula la liquidez acumulada en los mejores 15 niveles de compra/venta para evitar deslizamientos (Slippage).
-    """
     url_ticker = f"https://api.exchange.coinbase.com/products/{symbol}-USD/ticker"
     url_book = f"https://api.exchange.coinbase.com/products/{symbol}-USD/book?level=2"
     
@@ -67,55 +61,45 @@ def obtener_profundidad_libro_coinbase(symbol):
             
         spread_pct = ((ask - bid) / precio_real) * 100
         
-        # Filtro estricto inicial por Spread: Si supera el 0.3%, se descarta antes de analizar profundidad
         if spread_pct > 0.3:
             return None
             
-        # Consultamos el Order Book para verificar volumen real de soporte/resistencia
         res_b = requests.get(url_book, headers=HEADERS, timeout=4)
         liquidez_ask_usd = 0
         liquidez_bid_usd = 0
         
         if res_b.status_code == 200:
             b_data = res_b.json()
-            bids = b_data.get("bids", [])[:15]  # Top 15 ordenes de compra
-            asks = b_data.get("asks", [])[:15]  # Top 15 ordenes de venta
+            bids = b_data.get("bids", [])[:15]
+            asks = b_data.get("asks", [])[:15]
             
             liquidez_bid_usd = sum(float(b[0]) * float(b[1]) for b in bids)
-            liquidez_ask_usd = sum(float(a[0]) * float(a[1]) for a[a in asks])
+            liquidez_ask_usd = sum(float(a[0]) * float(a[1]) for a in asks)
             
         return {
             "symbol": symbol,
             "precio_vivido": precio_real,
             "spread_pct": round(spread_pct, 3),
-            "profundidad_compra_usd": round(liquidez_bid_usd, 2), # Soporte inmediato en $
-            "profundidad_venta_usd": round(liquidez_ask_usd, 2)   # Muro de venta en $
+            "profundidad_compra_usd": round(liquidez_bid_usd, 2),
+            "profundidad_venta_usd": round(liquidez_ask_usd, 2)
         }
     except Exception:
         pass
     return None
 
 def construir_embudo_mercado():
-    print("Iniciando escaneo masivo del mercado...")
     candidatas = obtener_candidatas_coingecko()
     matriz_filtrada = []
     
     for sym in candidatas:
-        # Filtro de profundidad de liquidez
         datos_depth = obtener_profundidad_libro_coinbase(sym)
-        
-        # FILTRO DE LIQUIDEZ MÍNIMA: Exigimos al menos $10,000 en profundidad inmediata en el libro
         if datos_depth and datos_depth["profundidad_compra_usd"] >= 10000:
             matriz_filtrada.append(datos_depth)
             
-        # Cuando tengamos las 5 mejores monedas con máxima liquidez, detenemos el embudo para optimizar cuota
         if len(matriz_filtrada) >= 5:
             break
             
-    print(f"Embudo completado: {len(matriz_filtrada)} monedas de alta liquidez enviadas a Gemini.")
     return matriz_filtrada
-
-# --- EVALUACIÓN DE IA OPTIMIZADA CON PROMPT FINO ---
 
 def analizar_oportunidades_y_cartera(matriz_fina, posiciones_actuales):
     client = genai.Client(api_key=GEMINI_API_KEY)
@@ -133,7 +117,7 @@ def analizar_oportunidades_y_cartera(matriz_fina, posiciones_actuales):
     {matriz_fina}
     
     CRITERIOS DE EVALUACIÓN:
-    1. PROFUNDIDAD DEL LIBRO: La matriz incluye la profundidad real en USD en los primeros niveles del Order Book (profundidad_compra_usd / profundidad_venta_usd). Si el muro de venta es mucho mayor que el de compra, evita la entrada.
+    1. PROFUNDIDAD DEL LIBRO: Revisa la profundidad real en USD en los primeros niveles del Order Book (profundidad_compra_usd / profundidad_venta_usd). Si el muro de venta es mucho mayor que el de compra, evita la entrada.
     2. FILTRO DE BENEFICIO NETO: Solo genera orden de compra si el objetivo neto cubre holgadamente la comisión del {FEE_ROUNDTRIP_PCT:.2f}% y deja rentabilidad superior al +2.5%.
     3. GESTIÓN DE CARTERA: Evalúa si alguna de las posiciones activas debe VENDERSE por alcanzar objetivo o tocar Stop Loss.
     
@@ -144,7 +128,7 @@ def analizar_oportunidades_y_cartera(matriz_fina, posiciones_actuales):
     - Moneda: [Ticker]
     - Acción: [COMPRAR / VENDER / MANTENER]
     - Precio Ejecución Coinbase: $X.XX
-    - Profundidad Disponible en Libro (Soporte/Muro): Compras ${"{:,.2f}"} / Ventas ${"{:,.2f}"}
+    - Profundidad Disponible en Libro (Soporte/Muro): Compras $X / Ventas $X
     - Target Profit NETO (Libre de comisiones): +X.XX%
     - Stop Loss Sugerido: $X.XX
     
