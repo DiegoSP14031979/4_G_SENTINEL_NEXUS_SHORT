@@ -12,6 +12,10 @@
         {
             "fecha": "2026-08-23T10:54:37.047352Z",
             "saldo": 1000.0
+        },
+        {
+            "fecha": "2026-08-23T11:46:39.648173Z",
+            "saldo": 1000.0
         }
     ],
     "decisiones": [
@@ -29,6 +33,11 @@
             "accion": "COMPRAR",
             "resumen": "COMPRA VALIDADA SOL: Doble confirmación horaria superada con profundidad de soporte de $459.8k USD. DOGE ingresa a matriz de seguimiento.",
             "fecha": "2026-08-23T10:54:37.047352Z"
+        },
+        {
+            "accion": "MANTENER",
+            "resumen": "MANTENER POSICIONES: Todas las posiciones en cartera muestran rendimiento positivo. DOGE descartado por falta de volumen. SAND entra a seguimiento (liquidez < $50k).",
+            "fecha": "2026-08-23T11:46:39.648173Z"
         }
     ]
 }
