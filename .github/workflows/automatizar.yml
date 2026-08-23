@@ -33,10 +33,10 @@ jobs:
           EMAIL_DESTINO: ${{ secrets.EMAIL_DESTINO }}
         run: python main.py
 
-      - name: Guardar Historial y Dashboard
+      - name: Guardar Historial, Dashboard y Seguimiento
         run: |
           git config --global user.name 'github-actions[bot]'
           git config --global user.email 'github-actions[bot]@users.noreply.github.com'
-          git add posiciones.json historial.json
-          git commit -m "Actualizar datos del dashboard [skip ci]" || exit 0
+          git add posiciones.json historial.json candidatas.json
+          git commit -m "Actualizar datos del dashboard y seguimiento [skip ci]" || exit 0
           git push
