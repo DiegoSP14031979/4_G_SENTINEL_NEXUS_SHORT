@@ -101,9 +101,9 @@ def analizar_oportunidades_y_cartera(matriz_fina, posiciones_actuales, candidata
     riesgo_maximo_usd = saldo_simulado * RIESGO_POR_TRADE_PCT
     
     prompt = f"""
-    Actúa como un Gestor Cuantitativo Profesional con Motor de Gestión de Riesgo por Operación Fija (Fixed Risk Sizing) y Trailing Stop.
+    Actúa como un Gestor Cuantitativo Profesional con Motor de Trailing Stop Loss y Protección de Brechas.
     
-    PARÁMETROS CUANTITATIVOS DE CUENTA:
+    PARÁMETROS DE CUENTA:
     - Capital Total Simulado: ${saldo_simulado:.2f} USD
     - Riesgo Máximo Autorizado por Operación (R): ${riesgo_maximo_usd:.2f} USD (1.5% del saldo total)
     - Comisiones Ida/Vuelta Coinbase: {FEE_ROUNDTRIP_PCT:.2f}%
@@ -114,23 +114,21 @@ def analizar_oportunidades_y_cartera(matriz_fina, posiciones_actuales, candidata
     CANDIDATAS EN SEGUIMIENTO (DOBLE CONFIRMACIÓN):
     {candidatas_previas}
     
-    MATRIZ DE LIQUIDEZ Y PROFUNDIDAD REAL (COINBASE LEVEL 2):
+    MATRIZ EN TIEMPO REAL (COINBASE LEVEL 2):
     {matriz_fina}
     
-    INSTRUCCIONES PROFESIONALES DE GESTIÓN:
-    1. TAMAÑO DE POSICIÓN DINÁMICO: Si recomiendas COMPRAR, el tamaño en USD de la orden se calcula obligatoriamente mediante:
-       Monto USD = Riesgo Máximo Autorizado (${riesgo_maximo_usd:.2f}) / % Distancia al Stop Loss
-       Ejemplo: Si el Stop Loss está a un 2.5% de distancia, la entrada será de ${riesgo_maximo_usd:.2f} / 0.025 = ${riesgo_maximo_usd / 0.025:.2f} USD.
-    
-    2. GESTIÓN DE SALIDA Y BREAK-EVEN:
-       - Si la ganancia neta supera el +1.5%, mueve el Stop Loss al precio de entrada (Break-Even).
-       - Si alcanza el Target Profit, ejecuta el Cierre o Trailing Stop y reporta el PnL neto en dólares.
+    REGLAS DE GESTIÓN Y TRAILING STOP LOSS:
+    1. COMPRA: Asigna un monto en USD = (${riesgo_maximo_usd:.2f} / % Distancia a Stop Loss inicial).
+    2. GESTIÓN DE POSICIONES ABIERTAS:
+       - Si Ganancia Neta >= +1.5%: Mueve Stop Loss a precio_entrada (BREAK-EVEN). Marca "break_even": true.
+       - Si Ganancia Neta >= +3.0%: Activa TRAILING STOP. Fija el nuevo Stop Loss a un 1.5% por debajo del precio máximo alcanzado y actualiza "max_precio_alcanzado".
+       - Si el precio cruza hacia abajo el Stop Loss ajustado: Cierra la posición (VENDER) y reporta en "profit_cerrado_usd" las ganancias netas acumuladas.
     
     INCLUYE OBLIGATORIAMENTE ESTOS BLOQUES JSON AL FINAL:
 
     ===JSON_CARTERA===
     [
-      {{"ticker": "BTC", "precio_entrada": 64000.0, "monto_usd": 300.0, "stop_loss": 62720.0, "take_profit": 66560.0, "break_even": true}}
+      {{"ticker": "BTC", "precio_entrada": 64000.0, "monto_usd": 300.0, "stop_loss": 64000.0, "take_profit": 67000.0, "break_even": true, "max_precio_alcanzado": 65500.0}}
     ]
     ===JSON_CARTERA===
 
@@ -140,12 +138,11 @@ def analizar_oportunidades_y_cartera(matriz_fina, posiciones_actuales, candidata
 
     ===JSON_DECISION===
     {{
-      "accion": "COMPRAR",
-      "resumen": "COMPRA BTC: Riesgo fijado en $15.00 (1.5%). Asignación dinámica calculada por distancia a Stop Loss.",
+      "accion": "MANTENER",
+      "resumen": "MANTENER BTC: Trailing Stop ajustado a $64,500 (+2.1% asegurado). Protegiendo ganancias en máximos.",
       "profit_cerrado_usd": 0.0
     }}
     ===JSON_DECISION===
-    (Si se ejecuta una venta, pon en "profit_cerrado_usd" el resultado neto final en dólares para actualizar la Bola de Nieve).
     """
     
     modelos = ['gemini-3.6-flash']
@@ -172,7 +169,6 @@ def actualizar_historial_y_cartera(respuesta_ia):
             dec_data = json.loads(partes_dec[1].strip())
             dec_data["fecha"] = fecha_iso
             
-            # Acumulamos o restamos el profit real neto de ventas
             profit_usd = float(dec_data.get("profit_cerrado_usd", 0.0))
             saldo_actual += profit_usd
             
@@ -201,7 +197,7 @@ def actualizar_historial_y_cartera(respuesta_ia):
 
 def enviar_correo(texto):
     msg = MIMEText(texto, 'plain', 'utf-8')
-    msg['Subject'] = "⚡ Alerta Trading Validado - Motor de Riesgo Fijo (1.5% R)"
+    msg['Subject'] = "⚡ Alerta Trading Validado - Motor Trailing Stop Activo"
     msg['From'] = EMAIL_ORIGEN
     msg['To'] = EMAIL_DESTINO
 
