@@ -32,6 +32,10 @@
         {
             "fecha": "2026-08-23T16:57:44.159805Z",
             "saldo": 3300.0
+        },
+        {
+            "fecha": "2026-08-23T17:49:23.228998Z",
+            "saldo": 3300.0
         }
     ],
     "decisiones": [
@@ -76,6 +80,12 @@
             "resumen": "MANTENER POSICIONES: Filtro Macro BTC en SEGURO ($77400.84 USD). Cartera al 100% de capacidad (4/4 slots). Ninguna posición ha superado el +1.5% neto para Break-Even ni tocado Stop Loss.",
             "profit_cerrado_usd": 0.0,
             "fecha": "2026-08-23T16:57:44.159805Z"
+        },
+        {
+            "accion": "MANTENER",
+            "resumen": "MANTENER POSICIONES: Macro BTC SEGURO ($77,237.64). Cartera al 100% de capacidad (4/4 slots ocupados). Ninguna posición ha alcanzado el umbral de Break-Even (+1.5% neto) ni ejecutado Stop Loss. DOGE se mantiene en lista de espera activa.",
+            "profit_cerrado_usd": 0.0,
+            "fecha": "2026-08-23T17:49:23.228998Z"
         }
     ],
     "ultimo_envio_whatsapp": "2026-08-23T14:24:26.861026Z"
