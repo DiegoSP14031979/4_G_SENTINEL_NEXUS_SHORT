@@ -1,1 +1,11 @@
-[]
+[
+    {
+        "ticker": "SOL",
+        "precio_entrada": 95.38,
+        "monto_usd": 825.0,
+        "stop_loss": 89.66,
+        "take_profit": 106.83,
+        "break_even": false,
+        "max_precio_alcanzado": 95.38
+    }
+]
