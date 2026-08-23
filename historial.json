@@ -16,6 +16,10 @@
         {
             "fecha": "2026-08-23T14:24:26.861026Z",
             "saldo": 3300.0
+        },
+        {
+            "fecha": "2026-08-23T14:29:26.564730Z",
+            "saldo": 3300.0
         }
     ],
     "decisiones": [
@@ -36,6 +40,12 @@
             "resumen": "MACRO SEGURO: Mantenemos SOL y BTC. Se ejecuta compra de ETH ($825.00 USD) respaldada por una presión compradora de 3.45x en el libro Nivel 2 y spread del 0.0%.",
             "profit_cerrado_usd": 0.0,
             "fecha": "2026-08-23T14:24:26.861026Z"
+        },
+        {
+            "accion": "COMPRAR_XRP",
+            "resumen": "Filtro Macro SEGURO. Se completan los 4 slots de cartera ejecutando compra en XRP a $1.5287 ($825.00 USD) por mejor liquidez y menor spread. Posiciones existentes mantenidas.",
+            "profit_cerrado_usd": 0.0,
+            "fecha": "2026-08-23T14:29:26.564730Z"
         }
     ],
     "ultimo_envio_whatsapp": "2026-08-23T14:24:26.861026Z"
