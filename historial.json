@@ -40,6 +40,10 @@
         {
             "fecha": "2026-08-23T19:02:27.292860Z",
             "saldo": 3300.0
+        },
+        {
+            "fecha": "2026-08-23T20:53:30.001003Z",
+            "saldo": 3300.0
         }
     ],
     "decisiones": [
@@ -96,6 +100,12 @@
             "resumen": "MANTENER POSICIONES: Filtro Macro SEGURO. Cartera al 100% (4/4 slots ocupados). Ninguna posición ha alcanzado el umbral para Break-Even (+1.5% neto) ni se han tocado niveles de Stop Loss.",
             "profit_cerrado_usd": 0.0,
             "fecha": "2026-08-23T19:02:27.292860Z"
+        },
+        {
+            "accion": "MANTENER",
+            "resumen": "MANTENER POSICIONES: Filtro Macro SEGURO. Cartera al 100% de capacidad (4/4 slots ocupados). Ninguna posición ha alcanzado el umbral de +1.5% para Break-Even ni ha ejecutado Stop Loss.",
+            "profit_cerrado_usd": 0.0,
+            "fecha": "2026-08-23T20:53:30.001003Z"
         }
     ],
     "ultimo_envio_whatsapp": "2026-08-23T14:24:26.861026Z"
