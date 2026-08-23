@@ -7,11 +7,14 @@ from email.mime.text import MIMEText
 from google import genai
 from google.genai.errors import APIError
 import requests
+import urllib.parse
 
 GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")
 EMAIL_ORIGEN = os.environ.get("EMAIL_ORIGEN")
 EMAIL_PASSWORD = os.environ.get("EMAIL_PASSWORD")
 EMAIL_DESTINO = os.environ.get("EMAIL_DESTINO")
+WHATSAPP_PHONE = os.environ.get("WHATSAPP_PHONE")
+WHATSAPP_API_KEY = os.environ.get("WHATSAPP_API_KEY")
 
 STABLECOINS = {"tether", "usd-coin", "first-digital-usd", "dai", "ethena-usde", "usdd", "pyusd", "tether-gold"}
 HEADERS = {"User-Agent": "Mozilla/5.0"}
@@ -37,11 +40,22 @@ def guardar_json(filepath, data):
     with open(filepath, "w", encoding="utf-8") as f:
         json.dump(data, f, indent=4, ensure_ascii=False)
 
+def enviar_whatsapp(mensaje):
+    if not WHATSAPP_PHONE or not WHATSAPP_API_KEY:
+        print("WhatsApp Secrets no configurados.")
+        return
+    try:
+        texto_encoded = urllib.parse.quote(mensaje)
+        url = f"https://api.callmebot.com/whatsapp.php?phone={WHATSAPP_PHONE}&text={texto_encoded}&apikey={WHATSAPP_API_KEY}"
+        res = requests.get(url, timeout=10)
+        if res.status_code == 200:
+            print("Mensaje de WhatsApp enviado correctamente.")
+        else:
+            print(f"Error enviando WhatsApp: Status {res.status_code}")
+    except Exception as e:
+        print("Error en conexión con CallMeBot:", e)
+
 def evaluar_regimen_macro_btc():
-    """
-    Evalúa la salud de Bitcoin (BTC-USD) como filtro macro.
-    Devuelve dict con el estado y precio actual.
-    """
     url_stats = "https://api.exchange.coinbase.com/products/BTC-USD/stats"
     url_ticker = "https://api.exchange.coinbase.com/products/BTC-USD/ticker"
     
@@ -55,7 +69,6 @@ def evaluar_regimen_macro_btc():
             
             if open_24h > 0:
                 cambio_btc_pct = ((precio_actual - open_24h) / open_24h) * 100
-                # Si BTC cae más de un 3.5% en 24h o muestra desplome severo, se activa la protección
                 alcista_o_neutral = cambio_btc_pct > -3.5
                 return {
                     "btc_precio": precio_actual,
@@ -200,16 +213,19 @@ def analizar_oportunidades_y_cartera(matriz_fina, posiciones_actuales, candidata
 
 def actualizar_historial_y_cartera(respuesta_ia):
     texto_correo = respuesta_ia
-    historial = cargar_json(FILE_HISTORIAL, {"capital_inicial": 3300.0, "registro_saldo": [], "decisiones": []})
-    fecha_iso = datetime.datetime.utcnow().isoformat() + "Z"
+    historial = cargar_json(FILE_HISTORIAL, {"capital_inicial": 3300.0, "registro_saldo": [], "decisiones": [], "ultimo_envio_whatsapp": ""})
+    fecha_dt = datetime.datetime.utcnow()
+    fecha_iso = fecha_dt.isoformat() + "Z"
 
     saldo_actual = historial.get("registro_saldo", [{}])[-1].get("saldo", historial.get("capital_inicial", 3300.0)) if historial.get("registro_saldo") else historial.get("capital_inicial", 3300.0)
 
+    resumen_decision = ""
     if "===JSON_DECISION===" in respuesta_ia:
         try:
             partes_dec = respuesta_ia.split("===JSON_DECISION===")
             dec_data = json.loads(partes_dec[1].strip())
             dec_data["fecha"] = fecha_iso
+            resumen_decision = dec_data.get("resumen", "")
             
             profit_usd = float(dec_data.get("profit_cerrado_usd", 0.0))
             saldo_actual += profit_usd
@@ -218,11 +234,13 @@ def actualizar_historial_y_cartera(respuesta_ia):
         except Exception as e:
             print("Error JSON decisión:", e)
 
+    posiciones = []
     if "===JSON_CARTERA===" in respuesta_ia:
         try:
             partes = respuesta_ia.split("===JSON_CARTERA===")
             texto_correo = partes[0].strip()
-            guardar_json(FILE_POSICIONES, json.loads(partes[1].strip()))
+            posiciones = json.loads(partes[1].strip())
+            guardar_json(FILE_POSICIONES, posiciones)
         except Exception as e:
             print("Error JSON cartera:", e)
 
@@ -234,18 +252,56 @@ def actualizar_historial_y_cartera(respuesta_ia):
             print("Error JSON candidatas:", e)
 
     historial["registro_saldo"].append({"fecha": fecha_iso, "saldo": round(saldo_actual, 2)})
+    
+    # LÓGICA DE RESUMEN DIARIO POR WHATSAPP (A las 20:00h UTC o en forzado manual)
+    ultimo_envio_str = historial.get("ultimo_envio_whatsapp", "")
+    debe_enviar_whatsapp = False
+    
+    if not ultimo_envio_str:
+        debe_enviar_whatsapp = True
+    else:
+        try:
+            ultimo_envio_dt = datetime.datetime.fromisoformat(ultimo_envio_str.replace("Z", ""))
+            horas_pasadas = (fecha_dt - ultimo_envio_dt).total_seconds() / 3600.0
+            if horas_pasadas >= 23.0:
+                debe_enviar_whatsapp = True
+        except Exception:
+            debe_enviar_whatsapp = True
+
+    if debe_enviar_whatsapp:
+        cap_ini = historial.get("capital_inicial", 3300.0)
+        diff = saldo_actual - cap_ini
+        pct = (diff / cap_ini) * 100
+        activos_str = ", ".join([p.get("ticker", "") for p in posiciones]) if posiciones else "Ninguno (100% Liquidez)"
+        
+        msg_wa = (
+            f"📊 *RESUMEN DIARIO DE TRADING (Fondo 3,000 €)*\n\n"
+            f"💰 *Capital Actual:* ${saldo_actual:.2f} USD\n"
+            f"📈 *Rendimiento Total:* {pct:+.2f}% (${diff:+.2f} USD)\n"
+            f"💼 *Posiciones Activas:* {len(posiciones)} / {MAX_POSICIONES_PARALELO} ({activos_str})\n\n"
+            f"🧠 *Última Decisión IA:*\n\"{resumen_decision}\"\n\n"
+            f"🌐 *Dashboard:* https://diegosp14031979.github.io/agente-cripto/"
+        )
+        enviar_whatsapp(msg_wa)
+        historial["ultimo_envio_whatsapp"] = fecha_iso
+
     guardar_json(FILE_HISTORIAL, historial)
     return texto_correo
 
 def enviar_correo(texto):
-    msg = MIMEText(texto, 'plain', 'utf-8')
-    msg['Subject'] = "⚡ Alerta Trading Validado - Motor Macro BTC Activo"
-    msg['From'] = EMAIL_ORIGEN
-    msg['To'] = EMAIL_DESTINO
+    if not EMAIL_ORIGEN or not EMAIL_PASSWORD or not EMAIL_DESTINO:
+        return
+    try:
+        msg = MIMEText(texto, 'plain', 'utf-8')
+        msg['Subject'] = "⚡ Alerta Trading Validado - Motor Macro BTC & WhatsApp Activos"
+        msg['From'] = EMAIL_ORIGEN
+        msg['To'] = EMAIL_DESTINO
 
-    with smtplib.SMTP_SSL('smtp.gmail.com', 465) as server:
-        server.login(EMAIL_ORIGEN, EMAIL_PASSWORD)
-        server.sendmail(EMAIL_ORIGEN, EMAIL_DESTINO, msg.as_string())
+        with smtplib.SMTP_SSL('smtp.gmail.com', 465) as server:
+            server.login(EMAIL_ORIGEN, EMAIL_PASSWORD)
+            server.sendmail(EMAIL_ORIGEN, EMAIL_DESTINO, msg.as_string())
+    except Exception as e:
+        print("Error enviando correo:", e)
 
 if __name__ == "__main__":
     posiciones = cargar_json(FILE_POSICIONES, [])
