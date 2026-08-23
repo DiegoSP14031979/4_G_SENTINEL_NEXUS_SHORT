@@ -21,7 +21,8 @@ FILE_CANDIDATAS = "candidatas.json"
 
 FEE_TAKER_PCT = 0.0060
 FEE_ROUNDTRIP_PCT = (FEE_TAKER_PCT * 2) * 100  # ~1.20% coste ida/vuelta
-RIESGO_POR_TRADE_PCT = 0.015                   # Riesgo máximo del 1.5% del capital total por operación
+RIESGO_POR_TRADE_PCT = 0.015                   # Riesgo máximo del 1.5% del capital total por operación ($R)
+MAX_POSICIONES_PARALELO = 4                    # 4 posiciones simultáneas (~750€ - 800€ por posición)
 
 def cargar_json(filepath, default):
     if os.path.exists(filepath):
@@ -91,7 +92,7 @@ def construir_embudo_mercado():
         datos_depth = obtener_profundidad_libro_coinbase(sym)
         if datos_depth and datos_depth["profundidad_compra_usd"] >= 10000:
             matriz_filtrada.append(datos_depth)
-        if len(matriz_filtrada) >= 5:
+        if len(matriz_filtrada) >= 8:
             break
     return matriz_filtrada
 
@@ -99,47 +100,52 @@ def analizar_oportunidades_y_cartera(matriz_fina, posiciones_actuales, candidata
     client = genai.Client(api_key=GEMINI_API_KEY)
     
     riesgo_maximo_usd = saldo_simulado * RIESGO_POR_TRADE_PCT
+    slots_disponibles = MAX_POSICIONES_PARALELO - len(posiciones_actuales)
+    monto_maximo_por_slot = saldo_simulado / MAX_POSICIONES_PARALELO
     
     prompt = f"""
-    Actúa como un Gestor Cuantitativo Profesional con Motor de Trailing Stop Loss y Protección de Brechas.
+    Actúa como un Gestor Cuantitativo Profesional de Fondos Cripto (Fondo Base de 3,000 EUR / 3,300 USD).
     
-    PARÁMETROS DE CUENTA:
-    - Capital Total Simulado: ${saldo_simulado:.2f} USD
+    PARÁMETROS CUANTITATIVOS DE CUENTA:
+    - Capital Total Disponible: ${saldo_simulado:.2f} USD
     - Riesgo Máximo Autorizado por Operación (R): ${riesgo_maximo_usd:.2f} USD (1.5% del saldo total)
+    - Máximo Permitido por Slot/Operación: ${monto_maximo_por_slot:.2f} USD
     - Comisiones Ida/Vuelta Coinbase: {FEE_ROUNDTRIP_PCT:.2f}%
+    - Huecos Disponibles en Cartera: {slots_disponibles} de {MAX_POSICIONES_PARALELO} máximo
     
-    POSICIONES ACTIVAS EN CARTERA:
+    POSICIONES ACTIVAS ACTUALES ({len(posiciones_actuales)}/{MAX_POSICIONES_PARALELO}):
     {posiciones_actuales}
     
     CANDIDATAS EN SEGUIMIENTO (DOBLE CONFIRMACIÓN):
     {candidatas_previas}
     
-    MATRIZ EN TIEMPO REAL (COINBASE LEVEL 2):
+    MATRIZ DE LIQUIDEZ NIVEL 2 (COINBASE):
     {matriz_fina}
     
-    REGLAS DE GESTIÓN Y TRAILING STOP LOSS:
-    1. COMPRA: Asigna un monto en USD = (${riesgo_maximo_usd:.2f} / % Distancia a Stop Loss inicial).
-    2. GESTIÓN DE POSICIONES ABIERTAS:
-       - Si Ganancia Neta >= +1.5%: Mueve Stop Loss a precio_entrada (BREAK-EVEN). Marca "break_even": true.
-       - Si Ganancia Neta >= +3.0%: Activa TRAILING STOP. Fija el nuevo Stop Loss a un 1.5% por debajo del precio máximo alcanzado y actualiza "max_precio_alcanzado".
-       - Si el precio cruza hacia abajo el Stop Loss ajustado: Cierra la posición (VENDER) y reporta en "profit_cerrado_usd" las ganancias netas acumuladas.
+    REGLAS DE GESTIÓN INSTITUCIONAL:
+    1. ABRIR POSICIÓN: Si hay slots libres ({slots_disponibles} disponibles), calcula la entrada mediante:
+       Monto USD = min(${monto_maximo_por_slot:.2f}, ${riesgo_maximo_usd:.2f} / % Distancia a Stop Loss).
+    2. TRAILING STOP LOSS Y PROTECCIÓN:
+       - Ganancia Neta >= +1.5%: Mueve Stop Loss a precio_entrada (BREAK-EVEN / Riesgo Cero).
+       - Ganancia Neta >= +3.0%: TRAILING STOP a 1.5% por debajo del máximo alcanzado.
+       - Si salta el Stop Loss: Vender y devolver capital e interese acumulados a la caja común.
     
     INCLUYE OBLIGATORIAMENTE ESTOS BLOQUES JSON AL FINAL:
 
     ===JSON_CARTERA===
     [
-      {{"ticker": "BTC", "precio_entrada": 64000.0, "monto_usd": 300.0, "stop_loss": 64000.0, "take_profit": 67000.0, "break_even": true, "max_precio_alcanzado": 65500.0}}
+      {{"ticker": "BTC", "precio_entrada": 64000.0, "monto_usd": 750.0, "stop_loss": 64000.0, "take_profit": 67000.0, "break_even": true, "max_precio_alcanzado": 65500.0}}
     ]
     ===JSON_CARTERA===
 
     ===JSON_CANDIDATAS===
-    ["ETH", "SOL"]
+    ["SOL", "AVAX"]
     ===JSON_CANDIDATAS===
 
     ===JSON_DECISION===
     {{
-      "accion": "MANTENER",
-      "resumen": "MANTENER BTC: Trailing Stop ajustado a $64,500 (+2.1% asegurado). Protegiendo ganancias en máximos.",
+      "accion": "COMPRAR",
+      "resumen": "COMPRA BTC: Entrada asignada de $750 USD. Riesgo controlado a $49.50 (1.5% R del fondo de 3,300 USD).",
       "profit_cerrado_usd": 0.0
     }}
     ===JSON_DECISION===
@@ -158,10 +164,10 @@ def analizar_oportunidades_y_cartera(matriz_fina, posiciones_actuales, candidata
 
 def actualizar_historial_y_cartera(respuesta_ia):
     texto_correo = respuesta_ia
-    historial = cargar_json(FILE_HISTORIAL, {"capital_inicial": 1000.0, "registro_saldo": [], "decisiones": []})
+    historial = cargar_json(FILE_HISTORIAL, {"capital_inicial": 3300.0, "registro_saldo": [], "decisiones": []})
     fecha_iso = datetime.datetime.utcnow().isoformat() + "Z"
 
-    saldo_actual = historial.get("registro_saldo", [{}])[-1].get("saldo", historial.get("capital_inicial", 1000.0)) if historial.get("registro_saldo") else historial.get("capital_inicial", 1000.0)
+    saldo_actual = historial.get("registro_saldo", [{}])[-1].get("saldo", historial.get("capital_inicial", 3300.0)) if historial.get("registro_saldo") else historial.get("capital_inicial", 3300.0)
 
     if "===JSON_DECISION===" in respuesta_ia:
         try:
@@ -197,7 +203,7 @@ def actualizar_historial_y_cartera(respuesta_ia):
 
 def enviar_correo(texto):
     msg = MIMEText(texto, 'plain', 'utf-8')
-    msg['Subject'] = "⚡ Alerta Trading Validado - Motor Trailing Stop Activo"
+    msg['Subject'] = "⚡ Alerta Trading Validado - Motor Institucional 3000€ Activo"
     msg['From'] = EMAIL_ORIGEN
     msg['To'] = EMAIL_DESTINO
 
@@ -208,9 +214,9 @@ def enviar_correo(texto):
 if __name__ == "__main__":
     posiciones = cargar_json(FILE_POSICIONES, [])
     candidatas = cargar_json(FILE_CANDIDATAS, [])
-    historial = cargar_json(FILE_HISTORIAL, {"capital_inicial": 1000.0, "registro_saldo": []})
+    historial = cargar_json(FILE_HISTORIAL, {"capital_inicial": 3300.0, "registro_saldo": []})
     
-    saldo_actual = historial.get("registro_saldo", [{}])[-1].get("saldo", 1000.0) if historial.get("registro_saldo") else 1000.0
+    saldo_actual = historial.get("registro_saldo", [{}])[-1].get("saldo", 3300.0) if historial.get("registro_saldo") else 3300.0
     
     matriz_fina = construir_embudo_mercado()
     if matriz_fina:
