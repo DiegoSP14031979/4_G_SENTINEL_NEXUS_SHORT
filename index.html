@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard Agente Trading Cripto</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body class="bg-slate-900 text-slate-100 min-h-screen p-4 md:p-8">
     <div class="max-w-6xl mx-auto space-y-6">
@@ -13,7 +14,7 @@
         <header class="flex flex-col md:flex-row justify-between items-center bg-slate-800 p-6 rounded-2xl border border-slate-700 shadow-xl">
             <div>
                 <h1 class="text-2xl md:text-3xl font-bold text-emerald-400">🤖 Agente Trading Cripto</h1>
-                <p class="text-slate-400 text-sm">Coinbase Advanced Live Audit Dashboard</p>
+                <p class="text-slate-400 text-sm">Coinbase Advanced Live Audit Dashboard (Fondo €3,000 / $3,300 USD)</p>
             </div>
             <div class="mt-4 md:mt-0 text-right">
                 <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
@@ -22,6 +23,14 @@
                 <p id="ultima-actualizacion" class="text-xs text-slate-500 mt-2">Cargando datos...</p>
             </div>
         </header>
+
+        <!-- GRÁFICO INTERACTIVO DE SALDO -->
+        <div class="bg-slate-800 p-6 rounded-xl border border-slate-700">
+            <h2 class="text-lg font-bold mb-4 text-slate-200">📈 Curva de Crecimiento del Capital (Bola de Nieve)</h2>
+            <div class="relative w-full h-72">
+                <canvas id="graficoSaldo"></canvas>
+            </div>
+        </div>
 
         <!-- CARDS DE SALDO Y ROI -->
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -39,13 +48,13 @@
             </div>
             <div class="bg-slate-800 p-5 rounded-xl border border-slate-700">
                 <p class="text-slate-400 text-xs font-semibold uppercase">Posiciones Abiertas</p>
-                <p id="total-posiciones" class="text-2xl font-bold mt-1 text-indigo-400">0</p>
+                <p id="total-posiciones" class="text-2xl font-bold mt-1 text-indigo-400">0 / 4</p>
             </div>
         </div>
 
-        <!-- MÉTICAS DE RENDIMIENTO TEMPORAL -->
+        <!-- MÉTRICAS DE RENDIMIENTO TEMPORAL -->
         <div class="bg-slate-800 p-6 rounded-xl border border-slate-700">
-            <h2 class="text-lg font-bold mb-4 text-slate-200">📈 Rendimiento Acumulado del Fondo</h2>
+            <h2 class="text-lg font-bold mb-4 text-slate-200">📊 Rendimiento Acumulado del Fondo</h2>
             <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
                 <div class="bg-slate-900/60 p-4 rounded-lg border border-slate-700/50">
                     <p class="text-xs text-slate-400">Hoy</p>
@@ -68,19 +77,21 @@
 
         <!-- CARTERA PERSISTENTE -->
         <div class="bg-slate-800 p-6 rounded-xl border border-slate-700">
-            <h2 class="text-lg font-bold mb-4 text-slate-200">📊 Cartera Activa (`posiciones.json`)</h2>
+            <h2 class="text-lg font-bold mb-4 text-slate-200">💼 Cartera Activa Multi-Slot (`posiciones.json`)</h2>
             <div class="overflow-x-auto">
                 <table class="w-full text-left text-sm text-slate-300">
                     <thead class="bg-slate-900 text-slate-400 uppercase text-xs">
                         <tr>
                             <th class="p-3">Ticker</th>
                             <th class="p-3">Precio Entrada</th>
+                            <th class="p-3">Monto USD</th>
                             <th class="p-3">Stop Loss</th>
                             <th class="p-3">Take Profit</th>
+                            <th class="p-3">Estado SL</th>
                         </tr>
                     </thead>
                     <tbody id="tabla-posiciones" class="divide-y divide-slate-700">
-                        <tr><td colspan="4" class="p-4 text-center text-slate-500">Sin posiciones abiertas actualmente</td></tr>
+                        <tr><td colspan="6" class="p-4 text-center text-slate-500">Sin posiciones abiertas actualmente</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -97,6 +108,8 @@
     </div>
 
     <script>
+        let chartInstancia = null;
+
         async function cargarDashboard() {
             try {
                 const resHist = await fetch('historial.json?t=' + Date.now());
@@ -105,8 +118,7 @@
                 const historial = await resHist.json();
                 const posiciones = await resPos.json();
 
-                // Datos Básicos
-                const capInicial = historial.capital_inicial || 1000;
+                const capInicial = historial.capital_inicial || 3300.0;
                 document.getElementById('cap-inicial').innerText = `$${capInicial.toFixed(2)}`;
                 
                 const registros = historial.registro_saldo || [];
@@ -116,33 +128,36 @@
                 document.getElementById('cap-actual').innerText = `$${saldoActual.toFixed(2)}`;
                 document.getElementById('ultima-actualizacion').innerText = `Última ejec: ${new Date(ultimaEntrada.fecha).toLocaleString()}`;
 
-                // Profit Neto Total
                 const diff = saldoActual - capInicial;
                 const pctTotal = (diff / capInicial) * 100;
                 const elProfit = document.getElementById('profit-neto');
                 elProfit.innerText = `${diff >= 0 ? '+' : ''}$${diff.toFixed(2)} (${pctTotal.toFixed(2)}%)`;
                 elProfit.className = `text-2xl font-bold mt-1 ${diff >= 0 ? 'text-emerald-400' : 'text-rose-400'}`;
 
-                // Cálculo ROI Temporal
                 calcularROIs(registros, capInicial, saldoActual);
+                renderizarGrafico(registros, capInicial);
 
-                // Cartera
-                document.getElementById('total-posiciones').innerText = posiciones.length;
+                document.getElementById('total-posiciones').innerText = `${posiciones.length} / 4`;
                 const tablaPos = document.getElementById('tabla-posiciones');
                 if(posiciones.length > 0) {
                     tablaPos.innerHTML = posiciones.map(p => `
                         <tr class="hover:bg-slate-750">
                             <td class="p-3 font-bold text-emerald-400">${p.ticker}</td>
                             <td class="p-3">$${p.precio_entrada}</td>
+                            <td class="p-3 font-semibold text-slate-200">$${p.monto_usd ? p.monto_usd.toFixed(2) : '-'}</td>
                             <td class="p-3 text-rose-400">$${p.stop_loss}</td>
                             <td class="p-3 text-emerald-400">$${p.take_profit}</td>
+                            <td class="p-3">
+                                <span class="px-2 py-0.5 rounded text-xs font-bold ${p.break_even ? 'bg-indigo-500/20 text-indigo-400' : 'bg-slate-700 text-slate-300'}">
+                                    ${p.break_even ? 'Break-Even' : 'Riesgo Inicial (1.5% R)'}
+                                </span>
+                            </td>
                         </tr>
                     `).join('');
                 } else {
-                    tablaPos.innerHTML = `<tr><td colspan="4" class="p-4 text-center text-slate-500">Sin posiciones abiertas en este momento</td></tr>`;
+                    tablaPos.innerHTML = `<tr><td colspan="6" class="p-4 text-center text-slate-500">Sin posiciones abiertas en este momento</td></tr>`;
                 }
 
-                // Decisiones
                 const listaDec = document.getElementById('lista-decisiones');
                 const decisiones = historial.decisiones || [];
                 if(decisiones.length > 0) {
@@ -162,6 +177,48 @@
             } catch (err) {
                 console.error("Error cargando dashboard:", err);
             }
+        }
+
+        function renderizarGrafico(registros, capInicial) {
+            const ctx = document.getElementById('graficoSaldo').getContext('2d');
+            
+            const etiquetas = registros.map(r => new Date(r.fecha).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
+            const datosSaldo = registros.map(r => r.saldo);
+
+            if(etiquetas.length === 0) {
+                etiquetas.push("Inicio");
+                datosSaldo.push(capInicial);
+            }
+
+            if (chartInstancia) {
+                chartInstancia.destroy();
+            }
+
+            chartInstancia = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: etiquetas,
+                    datasets: [{
+                        label: 'Saldo Cartera (USD)',
+                        data: datosSaldo,
+                        borderColor: '#10b981',
+                        backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                        fill: true,
+                        tension: 0.3,
+                        pointRadius: 4,
+                        pointBackgroundColor: '#10b981'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        x: { grid: { color: 'rgba(51, 65, 85, 0.3)' }, ticks: { color: '#94a3b8' } },
+                        y: { grid: { color: 'rgba(51, 65, 85, 0.3)' }, ticks: { color: '#94a3b8' } }
+                    }
+                }
+            });
         }
 
         function calcularROIs(registros, capInicial, saldoActual) {
