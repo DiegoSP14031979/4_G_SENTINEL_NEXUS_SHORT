@@ -52,6 +52,10 @@
         {
             "fecha": "2026-08-23T22:51:53.886557Z",
             "saldo": 3300.0
+        },
+        {
+            "fecha": "2026-08-23T23:43:54.394071Z",
+            "saldo": 3300.0
         }
     ],
     "decisiones": [
@@ -126,6 +130,12 @@
             "resumen": "MANTENER POSICIONES: Macro BTC a $77634.63 (SEGURO). Cartera a máxima capacidad (4/4 slots ocupados). Se actualizan los precios máximos de SOL y BTC. Sin activaciones de Break-Even o Stop Loss en la revisión cuantitativa actual.",
             "profit_cerrado_usd": 0.0,
             "fecha": "2026-08-23T22:51:53.886557Z"
+        },
+        {
+            "accion": "MANTENER",
+            "resumen": "MANTENER POSICIONES: Filtro Macro BTC SEGURO ($77,454.34). Cartera al 100% de capacidad (4/4 slots ocupados). Ninguna posición alcanza criterios de Break-Even o Trailing Stop, ni activa Stop Loss. Candidata DOGE se mantiene en seguimiento.",
+            "profit_cerrado_usd": 0.0,
+            "fecha": "2026-08-23T23:43:54.394071Z"
         }
     ],
     "ultimo_envio_whatsapp": "2026-08-23T14:24:26.861026Z"
