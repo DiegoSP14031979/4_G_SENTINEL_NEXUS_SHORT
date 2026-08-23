@@ -20,7 +20,8 @@ FILE_HISTORIAL = "historial.json"
 FILE_CANDIDATAS = "candidatas.json"
 
 FEE_TAKER_PCT = 0.0060
-FEE_ROUNDTRIP_PCT = (FEE_TAKER_PCT * 2) * 100
+FEE_ROUNDTRIP_PCT = (FEE_TAKER_PCT * 2) * 100  # ~1.20% coste ida/vuelta
+RIESGO_POR_TRADE_PCT = 0.015                   # Riesgo máximo del 1.5% del capital total por operación
 
 def cargar_json(filepath, default):
     if os.path.exists(filepath):
@@ -94,32 +95,42 @@ def construir_embudo_mercado():
             break
     return matriz_filtrada
 
-def analizar_oportunidades_y_cartera(matriz_fina, posiciones_actuales, candidatas_previas):
+def analizar_oportunidades_y_cartera(matriz_fina, posiciones_actuales, candidatas_previas, saldo_simulado):
     client = genai.Client(api_key=GEMINI_API_KEY)
     
+    riesgo_maximo_usd = saldo_simulado * RIESGO_POR_TRADE_PCT
+    
     prompt = f"""
-    Actúa como un gestor cuantitativo avanzado con motor de Doble Confirmación Técnica.
+    Actúa como un Gestor Cuantitativo Profesional con Motor de Gestión de Riesgo por Operación Fija (Fixed Risk Sizing) y Trailing Stop.
+    
+    PARÁMETROS CUANTITATIVOS DE CUENTA:
+    - Capital Total Simulado: ${saldo_simulado:.2f} USD
+    - Riesgo Máximo Autorizado por Operación (R): ${riesgo_maximo_usd:.2f} USD (1.5% del saldo total)
+    - Comisiones Ida/Vuelta Coinbase: {FEE_ROUNDTRIP_PCT:.2f}%
     
     POSICIONES ACTIVAS EN CARTERA:
     {posiciones_actuales}
     
-    CANDIDATAS EN SEGUIMIENTO DESDE EL CICLO ANTERIOR (1 HORA ATRÁS):
+    CANDIDATAS EN SEGUIMIENTO (DOBLE CONFIRMACIÓN):
     {candidatas_previas}
     
-    MATRIZ PRE-FILTRADA EN TIEMPO REAL (COINBASE LEVEL 2):
+    MATRIZ DE LIQUIDEZ Y PROFUNDIDAD REAL (COINBASE LEVEL 2):
     {matriz_fina}
     
-    REGLAS DE DOBLE CONFIRMACIÓN Y DECISIÓN:
-    1. OPORTUNIDAD ÉLITE: Si una moneda tiene una liquidez extrema (> $50,000 en soporte) y ruptura clara, ordénala COMPRAR inmediatamente (sin esperar).
-    2. CONFIRMACIÓN HORARIA: Si una moneda estaba en "CANDIDATAS EN SEGUIMIENTO" y en la matriz actual MANTIENE la fuerza técnica, apruébala para COMPRAR (Doble Confirmación superada).
-    3. NUEVA CANDIDATA: Si ves una buena oportunidad pero no es Élite, regístrala como "EN_SEGUIMIENTO" para confirmarla en el siguiente ciclo.
-    4. REVISAR CARTERA: Evalúa si alguna de las posiciones activas debe VENDERSE.
+    INSTRUCCIONES PROFESIONALES DE GESTIÓN:
+    1. TAMAÑO DE POSICIÓN DINÁMICO: Si recomiendas COMPRAR, el tamaño en USD de la orden se calcula obligatoriamente mediante:
+       Monto USD = Riesgo Máximo Autorizado (${riesgo_maximo_usd:.2f}) / % Distancia al Stop Loss
+       Ejemplo: Si el Stop Loss está a un 2.5% de distancia, la entrada será de ${riesgo_maximo_usd:.2f} / 0.025 = ${riesgo_maximo_usd / 0.025:.2f} USD.
     
-    INCLUYE OBLIGATORIAMENTE ESTOS BLOQUES JSON AL FINAL DE TU RESPUESTA:
+    2. GESTIÓN DE SALIDA Y BREAK-EVEN:
+       - Si la ganancia neta supera el +1.5%, mueve el Stop Loss al precio de entrada (Break-Even).
+       - Si alcanza el Target Profit, ejecuta el Cierre o Trailing Stop y reporta el PnL neto en dólares.
+    
+    INCLUYE OBLIGATORIAMENTE ESTOS BLOQUES JSON AL FINAL:
 
     ===JSON_CARTERA===
     [
-      {{"ticker": "BTC", "precio_entrada": 64000.0, "stop_loss": 62720.0, "take_profit": 66560.0}}
+      {{"ticker": "BTC", "precio_entrada": 64000.0, "monto_usd": 300.0, "stop_loss": 62720.0, "take_profit": 66560.0, "break_even": true}}
     ]
     ===JSON_CARTERA===
 
@@ -130,9 +141,11 @@ def analizar_oportunidades_y_cartera(matriz_fina, posiciones_actuales, candidata
     ===JSON_DECISION===
     {{
       "accion": "COMPRAR",
-      "resumen": "COMPRA VALIDADA BTC: Confirmación técnica de 2da hora + Soporte $120k."
+      "resumen": "COMPRA BTC: Riesgo fijado en $15.00 (1.5%). Asignación dinámica calculada por distancia a Stop Loss.",
+      "profit_cerrado_usd": 0.0
     }}
     ===JSON_DECISION===
+    (Si se ejecuta una venta, pon en "profit_cerrado_usd" el resultado neto final en dólares para actualizar la Bola de Nieve).
     """
     
     modelos = ['gemini-3.6-flash']
@@ -148,8 +161,25 @@ def analizar_oportunidades_y_cartera(matriz_fina, posiciones_actuales, candidata
 
 def actualizar_historial_y_cartera(respuesta_ia):
     texto_correo = respuesta_ia
-    
-    # 1. Cartera
+    historial = cargar_json(FILE_HISTORIAL, {"capital_inicial": 1000.0, "registro_saldo": [], "decisiones": []})
+    fecha_iso = datetime.datetime.utcnow().isoformat() + "Z"
+
+    saldo_actual = historial.get("registro_saldo", [{}])[-1].get("saldo", historial.get("capital_inicial", 1000.0)) if historial.get("registro_saldo") else historial.get("capital_inicial", 1000.0)
+
+    if "===JSON_DECISION===" in respuesta_ia:
+        try:
+            partes_dec = respuesta_ia.split("===JSON_DECISION===")
+            dec_data = json.loads(partes_dec[1].strip())
+            dec_data["fecha"] = fecha_iso
+            
+            # Acumulamos o restamos el profit real neto de ventas
+            profit_usd = float(dec_data.get("profit_cerrado_usd", 0.0))
+            saldo_actual += profit_usd
+            
+            historial["decisiones"].append(dec_data)
+        except Exception as e:
+            print("Error JSON decisión:", e)
+
     if "===JSON_CARTERA===" in respuesta_ia:
         try:
             partes = respuesta_ia.split("===JSON_CARTERA===")
@@ -158,7 +188,6 @@ def actualizar_historial_y_cartera(respuesta_ia):
         except Exception as e:
             print("Error JSON cartera:", e)
 
-    # 2. Candidatas en seguimiento
     if "===JSON_CANDIDATAS===" in respuesta_ia:
         try:
             partes_c = respuesta_ia.split("===JSON_CANDIDATAS===")
@@ -166,26 +195,13 @@ def actualizar_historial_y_cartera(respuesta_ia):
         except Exception as e:
             print("Error JSON candidatas:", e)
 
-    # 3. Historial
-    historial = cargar_json(FILE_HISTORIAL, {"capital_inicial": 1000.0, "registro_saldo": [], "decisiones": []})
-    fecha_iso = datetime.datetime.utcnow().isoformat() + "Z"
-
-    if "===JSON_DECISION===" in respuesta_ia:
-        try:
-            partes_dec = respuesta_ia.split("===JSON_DECISION===")
-            dec_data = json.loads(partes_dec[1].strip())
-            dec_data["fecha"] = fecha_iso
-            historial["decisiones"].append(dec_data)
-        except Exception as e:
-            print("Error JSON decisión:", e)
-
-    historial["registro_saldo"].append({"fecha": fecha_iso, "saldo": round(historial.get("capital_inicial", 1000.0), 2)})
+    historial["registro_saldo"].append({"fecha": fecha_iso, "saldo": round(saldo_actual, 2)})
     guardar_json(FILE_HISTORIAL, historial)
     return texto_correo
 
 def enviar_correo(texto):
     msg = MIMEText(texto, 'plain', 'utf-8')
-    msg['Subject'] = "⚡ Alerta Trading Validado - Confirmación Técnica"
+    msg['Subject'] = "⚡ Alerta Trading Validado - Motor de Riesgo Fijo (1.5% R)"
     msg['From'] = EMAIL_ORIGEN
     msg['To'] = EMAIL_DESTINO
 
@@ -196,9 +212,13 @@ def enviar_correo(texto):
 if __name__ == "__main__":
     posiciones = cargar_json(FILE_POSICIONES, [])
     candidatas = cargar_json(FILE_CANDIDATAS, [])
+    historial = cargar_json(FILE_HISTORIAL, {"capital_inicial": 1000.0, "registro_saldo": []})
+    
+    saldo_actual = historial.get("registro_saldo", [{}])[-1].get("saldo", 1000.0) if historial.get("registro_saldo") else 1000.0
+    
     matriz_fina = construir_embudo_mercado()
     if matriz_fina:
-        respuesta_raw = analizar_oportunidades_y_cartera(matriz_fina, posiciones, candidatas)
+        respuesta_raw = analizar_oportunidades_y_cartera(matriz_fina, posiciones, candidatas, saldo_actual)
         informe_limpio = actualizar_historial_y_cartera(respuesta_raw)
         enviar_correo(informe_limpio)
     else:
