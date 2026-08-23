@@ -1,1 +1,8 @@
-[]
+[
+    {
+        "ticker": "XRP",
+        "precio_entrada": 1.4481,
+        "stop_loss": 1.422,
+        "take_profit": 1.506
+    }
+]
