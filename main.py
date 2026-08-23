@@ -1,4 +1,5 @@
 import os
+import json
 import time
 import smtplib
 from email.mime.text import MIMEText
@@ -13,159 +14,152 @@ EMAIL_DESTINO = os.environ.get("EMAIL_DESTINO")
 
 STABLECOINS = {"tether", "usd-coin", "first-digital-usd", "dai", "ethena-usde", "usdd", "pyusd", "tether-gold"}
 HEADERS = {"User-Agent": "Mozilla/5.0"}
+FILE_POSICIONES = "posiciones.json"
 
-# --- CONECTORES MULTI-EXCHANGE ---
+# --- ESTRUCTURA DE COMISIONES COINBASE ADVANCED ---
+# Ajusta estos valores según tu nivel de volumen en Coinbase
+FEE_TAKER_PCT = 0.0060  # 0.60% comisión de mercado
+FEE_MAKER_PCT = 0.0040  # 0.40% comisión límite
+FEE_ROUNDTRIP_PCT = (FEE_TAKER_PCT + FEE_TAKER_PCT) * 100  # ~1.20% Coste total entrada/salida
 
-def obtener_top_coingecko():
+# --- GESTIÓN DE MEMORIA Y POSICIONES ---
+
+def cargar_posiciones():
+    if os.path.exists(FILE_POSICIONES):
+        try:
+            with open(FILE_POSICIONES, "r", encoding="utf-8") as f:
+                return json.load(f)
+        except Exception:
+            return []
+    return []
+
+def guardar_posiciones(posiciones):
+    with open(FILE_POSICIONES, "w", encoding="utf-8") as f:
+        json.dump(posiciones, f, indent=4, ensure_ascii=False)
+
+# --- ESCANEO DE MERCADO Y VALIDACIÓN EN DIRECTO ---
+
+def obtener_candidatas_coingecko():
+    """ CoinGecko actúa SOLO como radar de volumen para descubrir activos interesantes """
     url = "https://api.coingecko.com/api/v3/coins/markets"
-    params = {
-        "vs_currency": "usd",
-        "order": "volume_desc",
-        "per_page": 50,
-        "page": 1,
-        "sparkline": False,
-        "price_change_percentage": "24h"
-    }
+    params = {"vs_currency": "usd", "order": "volume_desc", "per_page": 40, "page": 1, "sparkline": False, "price_change_percentage": "24h"}
     try:
         res = requests.get(url, params=params, headers=HEADERS, timeout=10)
         res.raise_for_status()
-        datos = res.json()
-        filtradas = [c for c in datos if c["id"] not in STABLECOINS]
-        return filtradas[:25]  # Evaluamos las 25 más líquidas y activas
+        return [c["symbol"].upper() for c in res.json() if c["id"] not in STABLECOINS][:20]
     except Exception as e:
-        print("Error obteniendo CoinGecko:", e)
+        print("Error CoinGecko Radar:", e)
         return []
 
-def obtener_datos_binance(symbol):
-    # Binance Spot Ticker (ej: BTCUSDT)
-    url = f"https://api.binance.com/api/v3/ticker/24hr?symbol={symbol}USDT"
-    try:
-        res = requests.get(url, headers=HEADERS, timeout=5)
-        if res.status_code == 200:
-            data = res.json()
-            return {
-                "binance_precio": float(data.get("lastPrice", 0)),
-                "binance_volumen_usd": float(data.get("quoteVolume", 0)),
-                "binance_cambio_24h": float(data.get("priceChangePercent", 0))
-            }
-    except Exception:
-        pass
-    return {}
-
-def obtener_datos_bybit(symbol):
-    # Bybit Linear Futures (Funding Rate y Sentimiento de Derivados)
-    url = f"https://api.bybit.com/v5/market/tickers?category=linear&symbol={symbol}USDT"
-    try:
-        res = requests.get(url, headers=HEADERS, timeout=5)
-        if res.status_code == 200:
-            data = res.json()
-            list_data = data.get("result", {}).get("list", [])
-            if list_data:
-                item = list_data[0]
-                return {
-                    "bybit_funding_rate": float(item.get("fundingRate", 0)) * 100, # En %
-                    "bybit_open_interest": float(item.get("openInterest", 0))
-                }
-    except Exception:
-        pass
-    return {}
-
-def obtener_datos_coinbase(symbol):
-    # Coinbase Public Market Data (Spread y Bid/Ask)
+def obtener_precio_real_coinbase(symbol):
+    """ VALIDACIÓN EN VIVO: Obtiene el precio ejecutable exacto en Coinbase para evitar el efecto espejismo """
     url = f"https://api.exchange.coinbase.com/products/{symbol}-USD/ticker"
     try:
         res = requests.get(url, headers=HEADERS, timeout=5)
         if res.status_code == 200:
             data = res.json()
+            precio_real = float(data.get("price", 0))
             bid = float(data.get("bid", 0))
             ask = float(data.get("ask", 0))
+            volume_24h = float(data.get("volume", 0))
             spread = ask - bid
+            spread_pct = (spread / precio_real) * 100 if precio_real > 0 else 0
+            
             return {
-                "coinbase_precio": float(data.get("price", 0)),
+                "symbol": symbol,
+                "coinbase_precio_vivo": precio_real,
                 "coinbase_bid": bid,
                 "coinbase_ask": ask,
-                "coinbase_spread": round(spread, 4)
+                "spread_pct": round(spread_pct, 3),
+                "volume_24h_coinbase": round(volume_24h, 2)
             }
     except Exception:
         pass
-    return {}
+    return None
 
-def construir_matriz_consolidada():
-    base_coins = obtener_top_coingecko()
-    matriz_mercado = []
+def construir_matriz_validada():
+    candidatas = obtener_candidatas_coingecko()
+    matriz_verificada = []
+    
+    for sym in candidatas:
+        # Extraemos el precio REAL e INSTANTÁNEO directamente de Coinbase
+        datos_cb = obtener_precio_real_coinbase(sym)
+        if datos_cb and datos_cb["coinbase_precio_vivo"] > 0:
+            matriz_verificada.append(datos_cb)
+            
+    return matriz_verificada
 
-    for coin in base_coins:
-        sym = coin["symbol"].upper()
-        
-        # Consultamos APIs adicionales
-        b_data = obtener_datos_binance(sym)
-        by_data = obtener_datos_bybit(sym)
-        cb_data = obtener_datos_coinbase(sym)
+# --- INTELIGENCIA ARTIFICIAL Y CÁLCULO NETO DE RENTABILIDAD ---
 
-        # Matriz combinada por cada activo
-        matriz_mercado.append({
-            "ticker": sym,
-            "nombre": coin["name"],
-            "coingecko_precio": coin["current_price"],
-            "coingecko_cambio_24h_%": round(coin.get("price_change_percentage_24h") or 0, 2),
-            "coinbase_precio": cb_data.get("coinbase_precio", coin["current_price"]),
-            "coinbase_spread": cb_data.get("coinbase_spread", "N/A"),
-            "binance_cambio_24h_%": b_data.get("binance_cambio_24h", "N/A"),
-            "bybit_funding_rate_%": by_data.get("bybit_funding_rate", "N/A")
-        })
-
-    return matriz_mercado
-
-# --- INTELIGENCIA ARTIFICIAL Y EVALUACIÓN ---
-
-def analizar_oportunidades(matriz):
+def analizar_oportunidades_y_cartera(matriz, posiciones_actuales):
     client = genai.Client(api_key=GEMINI_API_KEY)
     
     prompt = f"""
-    Actúa como un trader cuantitativo institucional especializado en arbitrariedad, volumen y liquidez en Coinbase Advanced.
+    Actúa como un gestor cuantitativo estricto para Coinbase Advanced Trade.
     
-    Analiza la siguiente MATRIZ MULTI-EXCHANGE consolidada en tiempo real (CoinGecko, Coinbase, Binance y Bybit):
+    PARAMETROS DE COMISIÓN DE COINBASE:
+    - Coste por operación de compra/venta (Roundtrip Fee): {FEE_ROUNDTRIP_PCT:.2f}%
+    - REGLA DE ORO DE COSTES: Ninguna recomendación de compra es válida si el objetivo estimado no supera holgadamente el coste de las comisiones ({FEE_ROUNDTRIP_PCT:.2f}%).
+    
+    ESTADO ACTUAL DE LA CARTERA:
+    {posiciones_actuales}
+    
+    MATRIZ DE PRECIOS EN DIRECTO Y LIQUIDEZ (COINBASE LIVE):
     {matriz}
     
-    REGLAS DE EVALUACIÓN:
-    1. Busca CONSENSO: La tendencia y el impulso deben ser coincidentes entre las plataformas.
-    2. Atención al FUNDING RATE (Bybit): Si es extremadamente positivo (>0.05%), el mercado está sobrepalancado en compras (riesgo de caída). Si es negativo, hay presión vendedora excesiva.
-    3. Selecciona ÚNICAMENTE 1 o 2 oportunidades de alta probabilidad técnica para operar en Coinbase.
+    INSTRUCCIONES DE FILTRADO ANTI-FALSOS POSITIVOS:
+    1. VALIDACIÓN EN TIEMPO REAL: Los precios mostrados provienen directamente del ticker de Coinbase. No asumas precios de otras fuentes.
+    2. REVISAR POSICIONES: Evalúa si alguna moneda en cartera debe VENDERSE por alcanzar un beneficio neto claro o por activación de Stop Loss.
+    3. SELECCIONAR COMPRAS NETAS: Si encuentras una oportunidad, el Take Profit debe ser suficiente para cubrir la comisión de {FEE_ROUNDTRIP_PCT:.2f}% y dejar al menos un +2.5% de BENEFICIO NETO REAL.
+    4. SPREAD: Descarta monedas cuyo Spread sea > 0.5%, ya que la iliquidez se comería las ganancias.
     
     REGLAS DE SALIDA:
-    Si encuentras una oportunidad clara, genera un informe directo con este formato exacto por moneda:
+    Genera el informe con este formato:
     
-    🚨 OPORTUNIDAD DE CORTOPLAZO MULTI-EXCHANGE 🚨
-    - Moneda: [Nombre y Ticker]
-    - Acción: [COMPRAR / VENDER]
-    - Consenso de Mercado: [Justificación cruzando datos de Coinbase, Binance y Bybit]
-    - Precio de Entrada Sugerido: $X.XX
-    - Stop Loss (Pérdida máx -2%): $X.XX
-    - Take Profit (Objetivo +4%): $X.XX
-    - Nivel de Riesgo (1 al 10): X
+    🚨 ALERTAS DE GESTIÓN Y TRADING NETO 🚨
+    - Moneda: [Ticker]
+    - Acción: [COMPRAR / VENDER / MANTENER]
+    - Precio en Vivo Coinbase: $X.XX
+    - Comisión Estimada Coinbase ({FEE_ROUNDTRIP_PCT:.2f}%): $X.XX
+    - Target Profit NETO (Libre de comisiones): +X.XX% ($X.XX)
+    - Stop Loss Sugerido: $X.XX
+    - Justificación de Liquidez y Spread: [Análisis del Spread en vivo]
     
-    Si el mercado está plano o sin consenso claro, responde únicamente: "MERCADO SIN SEÑALES DE CORTO PLAZO".
+    AL FINAL DEL TEXTO, INCLUYE EL BLOQUE JSON DE CARTERA ACTUALIZADA ENTRE ESTAS MARCAS:
+    ===JSON_CARTERA===
+    [
+      {{"ticker": "BTC", "precio_entrada": 64000.0, "stop_loss": 62720.0, "take_profit": 66560.0}}
+    ]
+    ===JSON_CARTERA===
     """
     
     modelos = ['gemini-3.6-flash']
-    
     for modelo in modelos:
         for intento in range(3):
             try:
-                response = client.models.generate_content(
-                    model=modelo,
-                    contents=prompt,
-                )
+                response = client.models.generate_content(model=modelo, contents=prompt)
                 return response.text
             except APIError as e:
-                print(f"Intento {intento + 1} con {modelo} falló: {e}")
+                print(f"Intento {intento + 1} falló: {e}")
                 time.sleep(5)
-    
-    raise Exception("No se pudo obtener análisis de Gemini.")
+    raise Exception("Error consultando la IA.")
+
+def procesar_respuesta_y_guardar(respuesta_ia):
+    if "===JSON_CARTERA===" in respuesta_ia:
+        partes = respuesta_ia.split("===JSON_CARTERA===")
+        texto_correo = partes[0].strip()
+        json_str = partes[1].strip()
+        try:
+            nuevas_posiciones = json.loads(json_str)
+            guardar_posiciones(nuevas_posiciones)
+        except Exception as e:
+            print("Error parseando JSON de cartera:", e)
+        return texto_correo
+    return respuesta_ia
 
 def enviar_correo(texto):
     msg = MIMEText(texto, 'plain', 'utf-8')
-    msg['Subject'] = "⚡ Alerta Trading Multi-Exchange - Coinbase"
+    msg['Subject'] = "⚡ Alerta Trading Validado Coinbase (Neto Fees)"
     msg['From'] = EMAIL_ORIGEN
     msg['To'] = EMAIL_DESTINO
 
@@ -174,9 +168,11 @@ def enviar_correo(texto):
         server.sendmail(EMAIL_ORIGEN, EMAIL_DESTINO, msg.as_string())
 
 if __name__ == "__main__":
-    matriz = construir_matriz_consolidada()
-    if matriz:
-        informe = analizar_oportunidades(matriz)
-        enviar_correo(informe)
+    posiciones = cargar_posiciones()
+    matriz_live = construir_matriz_validada()
+    if matriz_live:
+        respuesta_raw = analizar_oportunidades_y_cartera(matriz_live, posiciones)
+        informe_limpio = procesar_respuesta_y_guardar(respuesta_raw)
+        enviar_correo(informe_limpio)
     else:
-        print("No se pudo construir la matriz de mercado.")
+        print("Error construyendo matriz live de Coinbase.")
