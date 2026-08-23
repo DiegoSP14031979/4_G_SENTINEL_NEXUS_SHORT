@@ -12,6 +12,10 @@
         {
             "fecha": "2026-08-23T14:01:47.295495Z",
             "saldo": 3300.0
+        },
+        {
+            "fecha": "2026-08-23T14:24:26.861026Z",
+            "saldo": 3300.0
         }
     ],
     "decisiones": [
@@ -26,6 +30,13 @@
             "resumen": "COMPRA BTC: Apertura de posición por $825.00 USD. Riesgo limitado estrictamente a $49.50 USD (1.5% R) con Stop Loss al 3% ($75,212.11) y Take Profit al 6% ($82,190.55). Posición SOL mantenida sin cambios.",
             "profit_cerrado_usd": 0.0,
             "fecha": "2026-08-23T14:01:47.295495Z"
+        },
+        {
+            "accion": "COMPRAR",
+            "resumen": "MACRO SEGURO: Mantenemos SOL y BTC. Se ejecuta compra de ETH ($825.00 USD) respaldada por una presión compradora de 3.45x en el libro Nivel 2 y spread del 0.0%.",
+            "profit_cerrado_usd": 0.0,
+            "fecha": "2026-08-23T14:24:26.861026Z"
         }
-    ]
+    ],
+    "ultimo_envio_whatsapp": "2026-08-23T14:24:26.861026Z"
 }
