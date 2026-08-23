@@ -1,5 +1,16 @@
 {
-  "capital_inicial": 1000.0,
-  "registro_saldo": [],
-  "decisiones": []
+    "capital_inicial": 1000.0,
+    "registro_saldo": [
+        {
+            "fecha": "2026-08-23T08:43:23.571186Z",
+            "saldo": 1000.0
+        }
+    ],
+    "decisiones": [
+        {
+            "accion": "MANTENER",
+            "resumen": "Todas las posiciones (BTC, ETH, XRP) evolucionan dentro de sus limites de SL/TP sin activar salidas ni detectarse nuevas compras con margen neto superior al 2.5% tras fees.",
+            "fecha": "2026-08-23T08:43:23.571186Z"
+        }
+    ]
 }
