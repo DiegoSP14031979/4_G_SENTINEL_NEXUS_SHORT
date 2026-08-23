@@ -1,53 +1,10 @@
 {
-    "capital_inicial": 1000.0,
+    "capital_inicial": 3300.0,
     "registro_saldo": [
         {
-            "fecha": "2026-08-23T08:43:23.571186Z",
-            "saldo": 1000.0
-        },
-        {
-            "fecha": "2026-08-23T09:11:04.040739Z",
-            "saldo": 1000.0
-        },
-        {
-            "fecha": "2026-08-23T10:54:37.047352Z",
-            "saldo": 1000.0
-        },
-        {
-            "fecha": "2026-08-23T11:46:39.648173Z",
-            "saldo": 1000.0
-        },
-        {
-            "fecha": "2026-08-23T13:29:59.684024Z",
-            "saldo": 1000.0
+            "fecha": "2026-03-30T10:00:00Z",
+            "saldo": 3300.0
         }
     ],
-    "decisiones": [
-        {
-            "accion": "MANTENER",
-            "resumen": "Todas las posiciones (BTC, ETH, XRP) evolucionan dentro de sus limites de SL/TP sin activar salidas ni detectarse nuevas compras con margen neto superior al 2.5% tras fees.",
-            "fecha": "2026-08-23T08:43:23.571186Z"
-        },
-        {
-            "accion": "MANTENER",
-            "resumen": "CARTERA ESTABLE: Posiciones activas (XRP, ETH, BTC) avanzan con PnL positivo hacia TP. SOL registrada EN_SEGUIMIENTO por alto volumen en soporte ($637k) para doble confirmación horaria.",
-            "fecha": "2026-08-23T09:11:04.040739Z"
-        },
-        {
-            "accion": "COMPRAR",
-            "resumen": "COMPRA VALIDADA SOL: Doble confirmación horaria superada con profundidad de soporte de $459.8k USD. DOGE ingresa a matriz de seguimiento.",
-            "fecha": "2026-08-23T10:54:37.047352Z"
-        },
-        {
-            "accion": "MANTENER",
-            "resumen": "MANTENER POSICIONES: Todas las posiciones en cartera muestran rendimiento positivo. DOGE descartado por falta de volumen. SAND entra a seguimiento (liquidez < $50k).",
-            "fecha": "2026-08-23T11:46:39.648173Z"
-        },
-        {
-            "accion": "COMPRAR",
-            "resumen": "COMPRA SAND: Entrada a $0.0453, asignación dinámica de $600.00 USD basada en un Stop Loss a 2.5% ($0.04417) para arriesgar exactamente $15.00 (1.5%). Ajuste a Break-Even aplicado en XRP y ETH al superar +1.5% neto.",
-            "profit_cerrado_usd": 0.0,
-            "fecha": "2026-08-23T13:29:59.684024Z"
-        }
-    ]
+    "decisiones": []
 }
