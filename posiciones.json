@@ -4,5 +4,17 @@
         "precio_entrada": 1.4481,
         "stop_loss": 1.422,
         "take_profit": 1.506
+    },
+    {
+        "ticker": "ETH",
+        "precio_entrada": 2388.13,
+        "stop_loss": 2352.31,
+        "take_profit": 2483.66
+    },
+    {
+        "ticker": "BTC",
+        "precio_entrada": 76044.74,
+        "stop_loss": 74904.07,
+        "take_profit": 79086.53
     }
 ]
