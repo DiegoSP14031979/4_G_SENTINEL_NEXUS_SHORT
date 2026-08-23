@@ -48,6 +48,10 @@
         {
             "fecha": "2026-08-23T21:44:49.658564Z",
             "saldo": 3300.0
+        },
+        {
+            "fecha": "2026-08-23T22:51:53.886557Z",
+            "saldo": 3300.0
         }
     ],
     "decisiones": [
@@ -116,6 +120,12 @@
             "resumen": "MANTENER POSICIONES: Macro BTC SEGURO a $77603.29. Cartera completa (4/4 slots). Sin ejecuciones de Break-Even ni SL. Actualizados máximos de BTC ($77607.86) y ETH ($2461.77).",
             "profit_cerrado_usd": 0.0,
             "fecha": "2026-08-23T21:44:49.658564Z"
+        },
+        {
+            "accion": "MANTENER",
+            "resumen": "MANTENER POSICIONES: Macro BTC a $77634.63 (SEGURO). Cartera a máxima capacidad (4/4 slots ocupados). Se actualizan los precios máximos de SOL y BTC. Sin activaciones de Break-Even o Stop Loss en la revisión cuantitativa actual.",
+            "profit_cerrado_usd": 0.0,
+            "fecha": "2026-08-23T22:51:53.886557Z"
         }
     ],
     "ultimo_envio_whatsapp": "2026-08-23T14:24:26.861026Z"
