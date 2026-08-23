@@ -16,5 +16,11 @@
         "precio_entrada": 76044.74,
         "stop_loss": 74904.07,
         "take_profit": 79086.53
+    },
+    {
+        "ticker": "SOL",
+        "precio_entrada": 93.66,
+        "stop_loss": 91.78,
+        "take_profit": 97.4
     }
 ]

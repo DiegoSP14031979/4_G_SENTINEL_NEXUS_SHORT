@@ -8,6 +8,10 @@
         {
             "fecha": "2026-08-23T09:11:04.040739Z",
             "saldo": 1000.0
+        },
+        {
+            "fecha": "2026-08-23T10:54:37.047352Z",
+            "saldo": 1000.0
         }
     ],
     "decisiones": [
@@ -20,6 +24,11 @@
             "accion": "MANTENER",
             "resumen": "CARTERA ESTABLE: Posiciones activas (XRP, ETH, BTC) avanzan con PnL positivo hacia TP. SOL registrada EN_SEGUIMIENTO por alto volumen en soporte ($637k) para doble confirmación horaria.",
             "fecha": "2026-08-23T09:11:04.040739Z"
+        },
+        {
+            "accion": "COMPRAR",
+            "resumen": "COMPRA VALIDADA SOL: Doble confirmación horaria superada con profundidad de soporte de $459.8k USD. DOGE ingresa a matriz de seguimiento.",
+            "fecha": "2026-08-23T10:54:37.047352Z"
         }
     ]
 }
