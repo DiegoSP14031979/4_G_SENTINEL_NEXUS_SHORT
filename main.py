@@ -37,6 +37,36 @@ def guardar_json(filepath, data):
     with open(filepath, "w", encoding="utf-8") as f:
         json.dump(data, f, indent=4, ensure_ascii=False)
 
+def evaluar_regimen_macro_btc():
+    """
+    Evalúa la salud de Bitcoin (BTC-USD) como filtro macro.
+    Devuelve dict con el estado y precio actual.
+    """
+    url_stats = "https://api.exchange.coinbase.com/products/BTC-USD/stats"
+    url_ticker = "https://api.exchange.coinbase.com/products/BTC-USD/ticker"
+    
+    try:
+        res_t = requests.get(url_ticker, headers=HEADERS, timeout=4)
+        res_s = requests.get(url_stats, headers=HEADERS, timeout=4)
+        
+        if res_t.status_code == 200 and res_s.status_code == 200:
+            precio_actual = float(res_t.json().get("price", 0))
+            open_24h = float(res_s.json().get("open", precio_actual))
+            
+            if open_24h > 0:
+                cambio_btc_pct = ((precio_actual - open_24h) / open_24h) * 100
+                # Si BTC cae más de un 3.5% en 24h o muestra desplome severo, se activa la protección
+                alcista_o_neutral = cambio_btc_pct > -3.5
+                return {
+                    "btc_precio": precio_actual,
+                    "btc_cambio_24h_pct": round(cambio_btc_pct, 2),
+                    "mercado_seguro": alcista_o_neutral
+                }
+    except Exception as e:
+        print("Error consultando Macro BTC:", e)
+    
+    return {"btc_precio": 0, "btc_cambio_24h_pct": 0.0, "mercado_seguro": True}
+
 def obtener_candidatas_coingecko():
     url = "https://api.coingecko.com/api/v3/coins/markets"
     params = {"vs_currency": "usd", "order": "volume_desc", "per_page": 50, "page": 1, "sparkline": False, "price_change_percentage": "24h"}
@@ -96,7 +126,7 @@ def construir_embudo_mercado():
             break
     return matriz_filtrada
 
-def analizar_oportunidades_y_cartera(matriz_fina, posiciones_actuales, candidatas_previas, saldo_simulado):
+def analizar_oportunidades_y_cartera(matriz_fina, posiciones_actuales, candidatas_previas, saldo_simulado, macro_btc):
     client = genai.Client(api_key=GEMINI_API_KEY)
     
     riesgo_maximo_usd = saldo_simulado * RIESGO_POR_TRADE_PCT
@@ -104,7 +134,12 @@ def analizar_oportunidades_y_cartera(matriz_fina, posiciones_actuales, candidata
     monto_maximo_por_slot = saldo_simulado / MAX_POSICIONES_PARALELO
     
     prompt = f"""
-    Actúa como un Gestor Cuantitativo Profesional de Fondos Cripto (Fondo Base de 3,000 EUR / 3,300 USD).
+    Actúa como un Gestor Cuantitativo Profesional de Fondos Cripto con Filtro Macro de BTC Integrado.
+    
+    ESTADO MACRO DEL MERCADO (FILTRO BITCOIN):
+    - Precio BTC: ${macro_btc.get('btc_precio', 0):.2f} USD
+    - Variación BTC 24h: {macro_btc.get('btc_cambio_24h_pct', 0.0)}%
+    - Estado Filtro Macro: {'SEGURO (Permitido operar)' if macro_btc.get('mercado_seguro') else 'PELIGRO MACRO (Bloquear nuevas compras)'}
     
     PARÁMETROS CUANTITATIVOS DE CUENTA:
     - Capital Total Disponible: ${saldo_simulado:.2f} USD
@@ -122,13 +157,14 @@ def analizar_oportunidades_y_cartera(matriz_fina, posiciones_actuales, candidata
     MATRIZ DE LIQUIDEZ NIVEL 2 (COINBASE):
     {matriz_fina}
     
-    REGLAS DE GESTIÓN INSTITUCIONAL:
-    1. ABRIR POSICIÓN: Si hay slots libres ({slots_disponibles} disponibles), calcula la entrada mediante:
+    REGLAS DE GESTIÓN INSTITUCIONAL CON FILTRO MACRO:
+    1. SI FILTRO MACRO = PELIGRO (BTC descolgándose): NO ABRIR NUEVAS POSICIONES. MANTENER LÍQUIDO EL CAPITAL LIBRE.
+    2. SI FILTRO MACRO = SEGURO y hay slots libres ({slots_disponibles} disponibles): Evalúa ABRIR nuevas entradas.
        Monto USD = min(${monto_maximo_por_slot:.2f}, ${riesgo_maximo_usd:.2f} / % Distancia a Stop Loss).
-    2. TRAILING STOP LOSS Y PROTECCIÓN:
+    3. GESTIONAR POSICIONES EXISTENTES (SIEMPRE ACTIVO):
        - Ganancia Neta >= +1.5%: Mueve Stop Loss a precio_entrada (BREAK-EVEN / Riesgo Cero).
        - Ganancia Neta >= +3.0%: TRAILING STOP a 1.5% por debajo del máximo alcanzado.
-       - Si salta el Stop Loss: Vender y devolver capital e interese acumulados a la caja común.
+       - Si salta el Stop Loss: Vender y devolver capital e intereses a la caja común.
     
     INCLUYE OBLIGATORIAMENTE ESTOS BLOQUES JSON AL FINAL:
 
@@ -144,8 +180,8 @@ def analizar_oportunidades_y_cartera(matriz_fina, posiciones_actuales, candidata
 
     ===JSON_DECISION===
     {{
-      "accion": "COMPRAR",
-      "resumen": "COMPRA BTC: Entrada asignada de $750 USD. Riesgo controlado a $49.50 (1.5% R del fondo de 3,300 USD).",
+      "accion": "MANTENER",
+      "resumen": "MANTENER POSICIONES: Macro BTC a ${macro_btc.get('btc_precio', 0):.2f} ({macro_btc.get('btc_cambio_24h_pct', 0.0)}%). Protegiendo las {len(posiciones_actuales)} posiciones activas con Stop Loss ajustados.",
       "profit_cerrado_usd": 0.0
     }}
     ===JSON_DECISION===
@@ -203,7 +239,7 @@ def actualizar_historial_y_cartera(respuesta_ia):
 
 def enviar_correo(texto):
     msg = MIMEText(texto, 'plain', 'utf-8')
-    msg['Subject'] = "⚡ Alerta Trading Validado - Motor Institucional 3000€ Activo"
+    msg['Subject'] = "⚡ Alerta Trading Validado - Motor Macro BTC Activo"
     msg['From'] = EMAIL_ORIGEN
     msg['To'] = EMAIL_DESTINO
 
@@ -218,9 +254,11 @@ if __name__ == "__main__":
     
     saldo_actual = historial.get("registro_saldo", [{}])[-1].get("saldo", 3300.0) if historial.get("registro_saldo") else 3300.0
     
+    macro_btc = evaluar_regimen_macro_btc()
     matriz_fina = construir_embudo_mercado()
+    
     if matriz_fina:
-        respuesta_raw = analizar_oportunidades_y_cartera(matriz_fina, posiciones, candidatas, saldo_actual)
+        respuesta_raw = analizar_oportunidades_y_cartera(matriz_fina, posiciones, candidatas, saldo_actual, macro_btc)
         informe_limpio = actualizar_historial_y_cartera(respuesta_raw)
         enviar_correo(informe_limpio)
     else:
