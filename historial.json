@@ -20,6 +20,10 @@
         {
             "fecha": "2026-08-23T14:29:26.564730Z",
             "saldo": 3300.0
+        },
+        {
+            "fecha": "2026-08-23T14:55:25.130974Z",
+            "saldo": 3300.0
         }
     ],
     "decisiones": [
@@ -46,6 +50,12 @@
             "resumen": "Filtro Macro SEGURO. Se completan los 4 slots de cartera ejecutando compra en XRP a $1.5287 ($825.00 USD) por mejor liquidez y menor spread. Posiciones existentes mantenidas.",
             "profit_cerrado_usd": 0.0,
             "fecha": "2026-08-23T14:29:26.564730Z"
+        },
+        {
+            "accion": "MANTENER",
+            "resumen": "MANTENER POSICIONES: Macro BTC SEGURO ($77240.41). Cartera al 100% de capacidad (4/4 slots). Ninguna posición alcanza el umbral de Break-Even (+1.5% neto) ni ha ejecutado Stop Loss. DOGE se mantiene en lista de seguimiento.",
+            "profit_cerrado_usd": 0.0,
+            "fecha": "2026-08-23T14:55:25.130974Z"
         }
     ],
     "ultimo_envio_whatsapp": "2026-08-23T14:24:26.861026Z"
