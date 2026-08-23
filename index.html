@@ -52,6 +52,28 @@
             </div>
         </div>
 
+        <!-- KPI: MÉTRICAS DE SALUD DEL ALGORITMO -->
+        <div class="bg-slate-800 p-6 rounded-xl border border-slate-700">
+            <h2 class="text-lg font-bold mb-4 text-slate-200">🧪 Salud Cuantitativa y Eficiencia (KPIs)</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
+                <div class="bg-slate-900/60 p-4 rounded-lg border border-slate-700/50">
+                    <p class="text-xs text-slate-400 uppercase font-semibold">Tasa de Acierto (Win Rate)</p>
+                    <p id="kpi-winrate" class="text-2xl font-bold mt-1 text-emerald-400">100.0%</p>
+                    <p class="text-xs text-slate-500 mt-1">% de operaciones en ganancia</p>
+                </div>
+                <div class="bg-slate-900/60 p-4 rounded-lg border border-slate-700/50">
+                    <p class="text-xs text-slate-400 uppercase font-semibold">Factor de Beneficio (Profit Factor)</p>
+                    <p id="kpi-profit-factor" class="text-2xl font-bold mt-1 text-indigo-400">N/A</p>
+                    <p class="text-xs text-slate-500 mt-1">Dólares ganados / perdedores</p>
+                </div>
+                <div class="bg-slate-900/60 p-4 rounded-lg border border-slate-700/50">
+                    <p class="text-xs text-slate-400 uppercase font-semibold">Máximo Desplome (Max Drawdown)</p>
+                    <p id="kpi-drawdown" class="text-2xl font-bold mt-1 text-slate-200">0.00%</p>
+                    <p class="text-xs text-slate-500 mt-1">Riesgo de caída histórico</p>
+                </div>
+            </div>
+        </div>
+
         <!-- MÉTRICAS DE RENDIMIENTO TEMPORAL -->
         <div class="bg-slate-800 p-6 rounded-xl border border-slate-700">
             <h2 class="text-lg font-bold mb-4 text-slate-200">📊 Rendimiento Acumulado del Fondo</h2>
@@ -135,6 +157,7 @@
                 elProfit.className = `text-2xl font-bold mt-1 ${diff >= 0 ? 'text-emerald-400' : 'text-rose-400'}`;
 
                 calcularROIs(registros, capInicial, saldoActual);
+                calcularKPIs(historial.decisiones || [], registros, capInicial);
                 renderizarGrafico(registros, capInicial);
 
                 document.getElementById('total-posiciones').innerText = `${posiciones.length} / 4`;
@@ -177,6 +200,47 @@
             } catch (err) {
                 console.error("Error cargando dashboard:", err);
             }
+        }
+
+        function calcularKPIs(decisiones, registros, capInicial) {
+            let ganadoras = 0, perdedoras = 0;
+            let profitTotal = 0, lossTotal = 0;
+
+            decisiones.forEach(d => {
+                const p = parseFloat(d.profit_cerrado_usd || 0);
+                if (p > 0) {
+                    ganadoras++;
+                    profitTotal += p;
+                } else if (p < 0) {
+                    perdedoras++;
+                    lossTotal += Math.abs(p);
+                }
+            });
+
+            const totalCerradas = ganadoras + perdedoras;
+            const winRate = totalCerradas > 0 ? (ganadoras / totalCerradas) * 100 : 100;
+            document.getElementById('kpi-winrate').innerText = `${winRate.toFixed(1)}%`;
+
+            const profitFactor = lossTotal > 0 ? (profitTotal / lossTotal).toFixed(2) : (profitTotal > 0 ? "∞" : "N/A");
+            document.getElementById('kpi-profit-factor').innerText = profitFactor;
+
+            // Calcular Max Drawdown
+            let maxPeak = capInicial;
+            let maxDrawdown = 0;
+
+            registros.forEach(r => {
+                if (r.saldo > maxPeak) {
+                    maxPeak = r.saldo;
+                }
+                const dd = ((maxPeak - r.saldo) / maxPeak) * 100;
+                if (dd > maxDrawdown) {
+                    maxDrawdown = dd;
+                }
+            });
+
+            const elDD = document.getElementById('kpi-drawdown');
+            elDD.innerText = `${maxDrawdown.toFixed(2)}%`;
+            elDD.className = `text-2xl font-bold mt-1 ${maxDrawdown > 5 ? 'text-rose-400' : 'text-slate-200'}`;
         }
 
         function renderizarGrafico(registros, capInicial) {
