@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Agente Trading Cripto</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen p-4 md:p-8">
+    <div class="max-w-6xl mx-auto space-y-6">
+        
+        <!-- HEADER -->
+        <header class="flex flex-col md:flex-row justify-between items-center bg-slate-800 p-6 rounded-2xl border border-slate-700 shadow-xl">
+            <div>
+                <h1 class="text-2xl md:text-3xl font-bold text-emerald-400">🤖 Agente Trading Cripto</h1>
+                <p class="text-slate-400 text-sm">Coinbase Advanced Live Audit Dashboard</p>
+            </div>
+            <div class="mt-4 md:mt-0 text-right">
+                <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                    <span class="w-2 h-2 mr-2 rounded-full bg-emerald-400 animate-pulse"></span> Sistema Activo
+                </span>
+                <p id="ultima-actualizacion" class="text-xs text-slate-500 mt-2">Cargando datos...</p>
+            </div>
+        </header>
+
+        <!-- CARDS DE SALDO Y ROI -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div class="bg-slate-800 p-5 rounded-xl border border-slate-700">
+                <p class="text-slate-400 text-xs font-semibold uppercase">Capital Inicial</p>
+                <p id="cap-inicial" class="text-2xl font-bold mt-1 text-slate-200">$0.00</p>
+            </div>
+            <div class="bg-slate-800 p-5 rounded-xl border border-slate-700">
+                <p class="text-slate-400 text-xs font-semibold uppercase">Valor Cartera Actual</p>
+                <p id="cap-actual" class="text-2xl font-bold mt-1 text-slate-100">$0.00</p>
+            </div>
+            <div class="bg-slate-800 p-5 rounded-xl border border-slate-700">
+                <p class="text-slate-400 text-xs font-semibold uppercase">Profit / Loss Neto</p>
+                <p id="profit-neto" class="text-2xl font-bold mt-1 text-emerald-400">$0.00 (0.00%)</p>
+            </div>
+            <div class="bg-slate-800 p-5 rounded-xl border border-slate-700">
+                <p class="text-slate-400 text-xs font-semibold uppercase">Posiciones Abiertas</p>
+                <p id="total-posiciones" class="text-2xl font-bold mt-1 text-indigo-400">0</p>
+            </div>
+        </div>
+
+        <!-- MÉTICAS DE RENDIMIENTO TEMPORAL -->
+        <div class="bg-slate-800 p-6 rounded-xl border border-slate-700">
+            <h2 class="text-lg font-bold mb-4 text-slate-200">📈 Rendimiento Acumulado del Fondo</h2>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+                <div class="bg-slate-900/60 p-4 rounded-lg border border-slate-700/50">
+                    <p class="text-xs text-slate-400">Hoy</p>
+                    <p id="roi-hoy" class="text-xl font-bold mt-1 text-slate-300">0.00%</p>
+                </div>
+                <div class="bg-slate-900/60 p-4 rounded-lg border border-slate-700/50">
+                    <p class="text-xs text-slate-400">Esta Semana</p>
+                    <p id="roi-semana" class="text-xl font-bold mt-1 text-slate-300">0.00%</p>
+                </div>
+                <div class="bg-slate-900/60 p-4 rounded-lg border border-slate-700/50">
+                    <p class="text-xs text-slate-400">Este Mes</p>
+                    <p id="roi-mes" class="text-xl font-bold mt-1 text-slate-300">0.00%</p>
+                </div>
+                <div class="bg-slate-900/60 p-4 rounded-lg border border-slate-700/50">
+                    <p class="text-xs text-slate-400">Este Año</p>
+                    <p id="roi-ano" class="text-xl font-bold mt-1 text-slate-300">0.00%</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- CARTERA PERSISTENTE -->
+        <div class="bg-slate-800 p-6 rounded-xl border border-slate-700">
+            <h2 class="text-lg font-bold mb-4 text-slate-200">📊 Cartera Activa (`posiciones.json`)</h2>
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-sm text-slate-300">
+                    <thead class="bg-slate-900 text-slate-400 uppercase text-xs">
+                        <tr>
+                            <th class="p-3">Ticker</th>
+                            <th class="p-3">Precio Entrada</th>
+                            <th class="p-3">Stop Loss</th>
+                            <th class="p-3">Take Profit</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabla-posiciones" class="divide-y divide-slate-700">
+                        <tr><td colspan="4" class="p-4 text-center text-slate-500">Sin posiciones abiertas actualmente</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- HISTORIAL DE DECISIONES DE LA IA -->
+        <div class="bg-slate-800 p-6 rounded-xl border border-slate-700">
+            <h2 class="text-lg font-bold mb-4 text-slate-200">🧠 Matriz de Razonamiento y Decisiones IA</h2>
+            <div id="lista-decisiones" class="space-y-4 max-h-96 overflow-y-auto pr-2">
+                <p class="text-slate-500 text-sm">Cargando historial de decisiones...</p>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        async function cargarDashboard() {
+            try {
+                const resHist = await fetch('historial.json?t=' + Date.now());
+                const resPos = await fetch('posiciones.json?t=' + Date.now());
+                
+                const historial = await resHist.json();
+                const posiciones = await resPos.json();
+
+                // Datos Básicos
+                const capInicial = historial.capital_inicial || 1000;
+                document.getElementById('cap-inicial').innerText = `$${capInicial.toFixed(2)}`;
+                
+                const registros = historial.registro_saldo || [];
+                const ultimaEntrada = registros[registros.length - 1] || { saldo: capInicial, fecha: new Date().toISOString() };
+                const saldoActual = ultimaEntrada.saldo;
+                
+                document.getElementById('cap-actual').innerText = `$${saldoActual.toFixed(2)}`;
+                document.getElementById('ultima-actualizacion').innerText = `Última ejec: ${new Date(ultimaEntrada.fecha).toLocaleString()}`;
+
+                // Profit Neto Total
+                const diff = saldoActual - capInicial;
+                const pctTotal = (diff / capInicial) * 100;
+                const elProfit = document.getElementById('profit-neto');
+                elProfit.innerText = `${diff >= 0 ? '+' : ''}$${diff.toFixed(2)} (${pctTotal.toFixed(2)}%)`;
+                elProfit.className = `text-2xl font-bold mt-1 ${diff >= 0 ? 'text-emerald-400' : 'text-rose-400'}`;
+
+                // Cálculo ROI Temporal
+                calcularROIs(registros, capInicial, saldoActual);
+
+                // Cartera
+                document.getElementById('total-posiciones').innerText = posiciones.length;
+                const tablaPos = document.getElementById('tabla-posiciones');
+                if(posiciones.length > 0) {
+                    tablaPos.innerHTML = posiciones.map(p => `
+                        <tr class="hover:bg-slate-750">
+                            <td class="p-3 font-bold text-emerald-400">${p.ticker}</td>
+                            <td class="p-3">$${p.precio_entrada}</td>
+                            <td class="p-3 text-rose-400">$${p.stop_loss}</td>
+                            <td class="p-3 text-emerald-400">$${p.take_profit}</td>
+                        </tr>
+                    `).join('');
+                } else {
+                    tablaPos.innerHTML = `<tr><td colspan="4" class="p-4 text-center text-slate-500">Sin posiciones abiertas en este momento</td></tr>`;
+                }
+
+                // Decisiones
+                const listaDec = document.getElementById('lista-decisiones');
+                const decisiones = historial.decisiones || [];
+                if(decisiones.length > 0) {
+                    listaDec.innerHTML = decisiones.slice().reverse().map(d => `
+                        <div class="bg-slate-900/70 p-4 rounded-lg border border-slate-700/60">
+                            <div class="flex justify-between items-center mb-2">
+                                <span class="text-xs font-mono text-slate-400">${new Date(d.fecha).toLocaleString()}</span>
+                                <span class="px-2 py-0.5 rounded text-xs font-bold ${d.accion === 'COMPRAR' ? 'bg-emerald-500/20 text-emerald-400' : d.accion === 'VENDER' ? 'bg-rose-500/20 text-rose-400' : 'bg-slate-700 text-slate-300'}">${d.accion}</span>
+                            </div>
+                            <p class="text-sm text-slate-200 font-medium">${d.resumen}</p>
+                        </div>
+                    `).join('');
+                } else {
+                    listaDec.innerHTML = `<p class="text-slate-500 text-sm">Aún no hay registros de decisiones en el historial.</p>`;
+                }
+
+            } catch (err) {
+                console.error("Error cargando dashboard:", err);
+            }
+        }
+
+        function calcularROIs(registros, capInicial, saldoActual) {
+            const ahora = new Date();
+            const hace24h = new Date(ahora - 24*60*60*1000);
+            const hace7d = new Date(ahora - 7*24*60*60*1000);
+            const hace30d = new Date(ahora - 30*24*60*60*1000);
+            const hace365d = new Date(ahora - 365*24*60*60*1000);
+
+            const buscarSaldoMasCercano = (fechaLimite) => {
+                const reg = registros.find(r => new Date(r.fecha) >= fechaLimite);
+                return reg ? reg.saldo : capInicial;
+            };
+
+            setROI('roi-hoy', saldoActual, buscarSaldoMasCercano(hace24h));
+            setROI('roi-semana', saldoActual, buscarSaldoMasCercano(hace7d));
+            setROI('roi-mes', saldoActual, buscarSaldoMasCercano(hace30d));
+            setROI('roi-ano', saldoActual, buscarSaldoMasCercano(hace365d));
+        }
+
+        function setROI(id, actual, base) {
+            const pct = ((actual - base) / base) * 100;
+            const el = document.getElementById(id);
+            el.innerText = `${pct >= 0 ? '+' : ''}${pct.toFixed(2)}%`;
+            el.className = `text-xl font-bold mt-1 ${pct >= 0 ? 'text-emerald-400' : 'text-rose-400'}`;
+        }
+
+        cargarDashboard();
+    </script>
+</body>
+</html>
