@@ -65,7 +65,7 @@
 
         .grid-kpi {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             gap: 15px;
         }
 
@@ -172,7 +172,7 @@
         <canvas id="capitalChart" height="80"></canvas>
     </div>
 
-    <!-- Metricas de Balance principal + Nuevo Contador de Trades -->
+    <!-- Metricas de Balance principal + Contador de Trades -->
     <div class="grid-kpi">
         <div class="card">
             <div class="kpi-title">Capital Inicial</div>
@@ -190,7 +190,7 @@
             <div class="kpi-title">Posiciones Abiertas</div>
             <div class="kpi-value" id="pos-abiertas">0 / 4</div>
         </div>
-        <!-- KPI: Contador de Operaciones para Fase Adaptativa -->
+        <!-- KPI: Contador de Operaciones -->
         <div class="card">
             <div class="kpi-title">Operaciones Cerradas</div>
             <div class="kpi-value text-purple" id="total-trades">0 / 100</div>
@@ -220,7 +220,7 @@
         </div>
     </div>
 
-    <!-- Cartera Activa -->
+    <!-- Cartera Activa con Columna de Precio Actual -->
     <div class="card">
         <div class="kpi-title">💼 Cartera Activa Multi-Slot (`posiciones.json`)</div>
         <table>
@@ -228,6 +228,7 @@
                 <tr>
                     <th>Ticker</th>
                     <th>Precio Entrada</th>
+                    <th>Precio Actual</th>
                     <th>Monto USD</th>
                     <th>Stop Loss</th>
                     <th>Take Profit</th>
@@ -235,7 +236,7 @@
                 </tr>
             </thead>
             <tbody id="tabla-posiciones">
-                <tr><td colspan="6" style="text-align: center;">Cargando posiciones...</td></tr>
+                <tr><td colspan="7" style="text-align: center;">Cargando posiciones...</td></tr>
             </tbody>
         </table>
     </div>
@@ -252,9 +253,17 @@
 <script>
     let capitalChart = null;
 
+    // Precios de referencia del mercado para cálculo de PnL flotante
+    const preciosMercado = {
+        "BTC": 77450.00,
+        "ETH": 2450.00,
+        "SOL": 94.10,
+        "XRP": 1.4708,
+        "DOGE": 0.1250
+    };
+
     async function cargarDashboard() {
         try {
-            // Cargar datos del historial y posiciones
             const resHistorial = await fetch('historial.json?v=' + new Date().getTime());
             const historial = await resHistorial.json();
 
@@ -270,7 +279,6 @@
     }
 
     function actualizarContadorTrades(historialData) {
-        // Filtrar trades cerrados (ventas / stop loss / take profit)
         const tradesCerrados = historialData.filter(item => 
             item.accion && (
                 item.accion.includes('STOP_LOSS') || 
@@ -291,7 +299,6 @@
 
         const ultimoRegistro = historial[historial.length - 1];
         
-        // Header e Info general
         document.getElementById('last-update').innerText = `Última ejec: ${ultimoRegistro.timestamp || '--'}`;
         document.getElementById('cap-actual').innerText = `$${(ultimoRegistro.capital || 3300).toFixed(2)}`;
         
@@ -301,7 +308,6 @@
         pnlElem.innerText = `${pnl >= 0 ? '+' : ''}$${pnl.toFixed(2)} (${pnlPct.toFixed(2)}%)`;
         pnlElem.className = `kpi-value ${pnl >= 0 ? 'text-green' : 'text-red'}`;
 
-        // Posiciones activas
         const totalPos = Object.keys(posiciones).length;
         document.getElementById('pos-abiertas').innerText = `${totalPos} / 4`;
 
@@ -309,14 +315,21 @@
         tbody.innerHTML = '';
 
         if (totalPos === 0) {
-            tbody.innerHTML = '<tr><td colspan="6" style="text-align: center;">Sin posiciones abiertas. 100% Liquidez en USD.</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="7" style="text-align: center;">Sin posiciones abiertas. 100% Liquidez en USD.</td></tr>';
         } else {
             for (const [ticker, pos] of Object.entries(posiciones)) {
+                const precioEntrada = pos.precio_entrada || 0;
+                const precioActual = pos.precio_actual || preciosMercado[ticker] || precioEntrada;
+                
+                const pnlFlotantePct = precioEntrada > 0 ? ((precioActual - precioEntrada) / precioEntrada) * 100 : 0;
+                const colorPnl = pnlFlotantePct >= 0 ? 'var(--accent-green)' : 'var(--accent-red)';
+
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
                     <td class="text-green" style="font-weight: bold;">${ticker}</td>
-                    <td>$${pos.precio_entrada}</td>
-                    <td>$${pos.monto_usd.toFixed(2)}</td>
+                    <td>$${precioEntrada}</td>
+                    <td style="color: ${colorPnl}; font-weight: bold;">$${precioActual} (${pnlFlotantePct >= 0 ? '+' : ''}${pnlFlotantePct.toFixed(2)}%)</td>
+                    <td>$${(pos.monto_usd || 0).toFixed(2)}</td>
                     <td class="text-red">$${pos.stop_loss}</td>
                     <td class="text-green">$${pos.take_profit}</td>
                     <td><span class="log-badge">${pos.estado_sl || 'Riesgo Inicial'}</span></td>
@@ -325,11 +338,9 @@
             }
         }
 
-        // Matriz de razonamiento
         const logContainer = document.getElementById('log-decisiones');
         logContainer.innerHTML = '';
         
-        // Mostrar los ultimos logs en orden inverso
         const ultimosLogs = [...historial].reverse().slice(0, 15);
         ultimosLogs.forEach(log => {
             const item = document.createElement('div');
@@ -378,7 +389,6 @@
         });
     }
 
-    // Inicializar dashboard al cargar la página
     window.onload = cargarDashboard;
 </script>
 </body>
