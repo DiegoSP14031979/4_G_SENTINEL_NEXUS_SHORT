@@ -56,6 +56,10 @@
         {
             "fecha": "2026-08-23T23:43:54.394071Z",
             "saldo": 3300.0
+        },
+        {
+            "fecha": "2026-08-24T03:33:49.620316Z",
+            "saldo": 3259.04
         }
     ],
     "decisiones": [
@@ -136,6 +140,12 @@
             "resumen": "MANTENER POSICIONES: Filtro Macro BTC SEGURO ($77,454.34). Cartera al 100% de capacidad (4/4 slots ocupados). Ninguna posición alcanza criterios de Break-Even o Trailing Stop, ni activa Stop Loss. Candidata DOGE se mantiene en seguimiento.",
             "profit_cerrado_usd": 0.0,
             "fecha": "2026-08-23T23:43:54.394071Z"
+        },
+        {
+            "accion": "EJECUTAR_STOP_LOSS",
+            "resumen": "EJECUCIÓN DE STOP LOSS EN XRP: Venta activada a $1.4708 tras perforar el SL de $1.4905. Posición cerrada liberando 1 slot. Se mantienen SOL, BTC y ETH en cartera.",
+            "profit_cerrado_usd": -40.96,
+            "fecha": "2026-08-24T03:33:49.620316Z"
         }
     ],
     "ultimo_envio_whatsapp": "2026-08-23T14:24:26.861026Z"
