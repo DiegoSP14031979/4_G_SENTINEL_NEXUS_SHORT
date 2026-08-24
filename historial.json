@@ -76,6 +76,10 @@
         {
             "fecha": "2026-08-24T12:00:16.484501Z",
             "saldo": 3259.04
+        },
+        {
+            "fecha": "2026-08-24T14:27:17.411423Z",
+            "saldo": 3259.04
         }
     ],
     "decisiones": [
@@ -186,7 +190,13 @@
             "resumen": "MANTENER POSICIONES: Filtro Macro BTC SEGURO ($78437.81, +1.49%). Cartera al 100% de capacidad (4/4 slots). Se actualizan los máximos alcanzados de SOL, BTC, ETH y DOGE sin cambios en niveles de Stop Loss al no alcanzar el +1.5% de ganancia neta.",
             "profit_cerrado_usd": 0.0,
             "fecha": "2026-08-24T12:00:16.484501Z"
+        },
+        {
+            "accion": "MANTENER",
+            "resumen": "MANTENER POSICIONES: Cartera al 100% de capacidad (4/4). Se actualizan los máximos alcanzados por BTC ($79187.97) y ETH ($2511.66). Ninguna posición supera el +1.5% neto para activar Break-Even.",
+            "profit_cerrado_usd": 0.0,
+            "fecha": "2026-08-24T14:27:17.411423Z"
         }
     ],
-    "ultimo_envio_whatsapp": "2026-08-23T14:24:26.861026Z"
+    "ultimo_envio_whatsapp": "2026-08-24T14:27:17.411423Z"
 }
