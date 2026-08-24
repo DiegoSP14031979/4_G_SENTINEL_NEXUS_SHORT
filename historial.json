@@ -72,6 +72,10 @@
         {
             "fecha": "2026-08-24T10:58:57.203677Z",
             "saldo": 3259.04
+        },
+        {
+            "fecha": "2026-08-24T12:00:16.484501Z",
+            "saldo": 3259.04
         }
     ],
     "decisiones": [
@@ -176,6 +180,12 @@
             "resumen": "ENTRADA EJECUTADA EN DOGE: Filtro macro BTC seguro ($77,555.95 USD). Se abre posición en DOGE a $0.09082 con $814.76 USD. Posiciones previas (SOL, BTC, ETH) mantenidas con actualización del máximo de ETH a $2,462.85.",
             "profit_cerrado_usd": 0.0,
             "fecha": "2026-08-24T10:58:57.203677Z"
+        },
+        {
+            "accion": "MANTENER",
+            "resumen": "MANTENER POSICIONES: Filtro Macro BTC SEGURO ($78437.81, +1.49%). Cartera al 100% de capacidad (4/4 slots). Se actualizan los máximos alcanzados de SOL, BTC, ETH y DOGE sin cambios en niveles de Stop Loss al no alcanzar el +1.5% de ganancia neta.",
+            "profit_cerrado_usd": 0.0,
+            "fecha": "2026-08-24T12:00:16.484501Z"
         }
     ],
     "ultimo_envio_whatsapp": "2026-08-23T14:24:26.861026Z"
