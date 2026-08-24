@@ -3,314 +3,383 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard Agente Trading Cripto</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <title>Agente Trading Cripto - Audit Dashboard</title>
+    <!-- Chart.js para la gráfica de capital -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --accent-green: #10b981;
+            --accent-red: #ef4444;
+            --accent-blue: #3b82f6;
+            --accent-purple: #8b5cf6;
+            --border-color: #334155;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .header {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 1.5rem;
+            color: var(--accent-green);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .status-badge {
+            background-color: rgba(16, 185, 129, 0.1);
+            color: var(--accent-green);
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            border: 1px solid var(--accent-green);
+        }
+
+        .grid-kpi {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 15px;
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 20px;
+        }
+
+        .kpi-title {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+        }
+
+        .kpi-value {
+            font-size: 1.6rem;
+            font-weight: bold;
+        }
+
+        .kpi-subtext {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            margin-top: 5px;
+        }
+
+        .text-green { color: var(--accent-green); }
+        .text-red { color: var(--accent-red); }
+        .text-purple { color: var(--accent-purple); }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        th, td {
+            text-align: left;
+            padding: 12px;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 0.9rem;
+        }
+
+        th {
+            color: var(--text-secondary);
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.75rem;
+        }
+
+        .matrix-log {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            max-height: 350px;
+            overflow-y: auto;
+        }
+
+        .log-item {
+            background-color: rgba(15, 23, 42, 0.6);
+            border-left: 4px solid var(--accent-blue);
+            padding: 12px;
+            border-radius: 4px;
+            font-size: 0.85rem;
+        }
+
+        .log-header {
+            display: flex;
+            justify-content: space-between;
+            color: var(--text-secondary);
+            font-size: 0.75rem;
+            margin-bottom: 5px;
+        }
+
+        .log-badge {
+            background-color: var(--border-color);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+    </style>
 </head>
-<body class="bg-slate-900 text-slate-100 min-h-screen p-4 md:p-8">
-    <div class="max-w-6xl mx-auto space-y-6">
-        
-        <!-- HEADER -->
-        <header class="flex flex-col md:flex-row justify-between items-center bg-slate-800 p-6 rounded-2xl border border-slate-700 shadow-xl">
-            <div>
-                <h1 class="text-2xl md:text-3xl font-bold text-emerald-400">🤖 Agente Trading Cripto</h1>
-                <p class="text-slate-400 text-sm">Coinbase Advanced Live Audit Dashboard (Fondo €3,000 / $3,300 USD)</p>
-            </div>
-            <div class="mt-4 md:mt-0 text-right">
-                <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                    <span class="w-2 h-2 mr-2 rounded-full bg-emerald-400 animate-pulse"></span> Sistema Activo
-                </span>
-                <p id="ultima-actualizacion" class="text-xs text-slate-500 mt-2">Cargando datos...</p>
-            </div>
-        </header>
+<body>
 
-        <!-- GRÁFICO INTERACTIVO DE SALDO -->
-        <div class="bg-slate-800 p-6 rounded-xl border border-slate-700">
-            <h2 class="text-lg font-bold mb-4 text-slate-200">📈 Curva de Crecimiento del Capital (Bola de Nieve)</h2>
-            <div class="relative w-full h-72">
-                <canvas id="graficoSaldo"></canvas>
-            </div>
+<div class="container">
+    <!-- Header principal -->
+    <div class="header">
+        <div>
+            <h1>🤖 Agente Trading Cripto</h1>
+            <div class="kpi-subtext">Coinbase Advanced Live Audit Dashboard (Fondo €3,000 / $3,300 USD)</div>
         </div>
-
-        <!-- CARDS DE SALDO Y ROI -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            <div class="bg-slate-800 p-5 rounded-xl border border-slate-700">
-                <p class="text-slate-400 text-xs font-semibold uppercase">Capital Inicial</p>
-                <p id="cap-inicial" class="text-2xl font-bold mt-1 text-slate-200">$0.00</p>
-            </div>
-            <div class="bg-slate-800 p-5 rounded-xl border border-slate-700">
-                <p class="text-slate-400 text-xs font-semibold uppercase">Valor Cartera Actual</p>
-                <p id="cap-actual" class="text-2xl font-bold mt-1 text-slate-100">$0.00</p>
-            </div>
-            <div class="bg-slate-800 p-5 rounded-xl border border-slate-700">
-                <p class="text-slate-400 text-xs font-semibold uppercase">Profit / Loss Neto</p>
-                <p id="profit-neto" class="text-2xl font-bold mt-1 text-emerald-400">$0.00 (0.00%)</p>
-            </div>
-            <div class="bg-slate-800 p-5 rounded-xl border border-slate-700">
-                <p class="text-slate-400 text-xs font-semibold uppercase">Posiciones Abiertas</p>
-                <p id="total-posiciones" class="text-2xl font-bold mt-1 text-indigo-400">0 / 4</p>
-            </div>
+        <div>
+            <span class="status-badge">● Sistema Activo</span>
+            <div class="kpi-subtext" id="last-update" style="text-align: right; margin-top: 5px;">Última ejec: --</div>
         </div>
-
-        <!-- KPI: MÉTRICAS DE SALUD DEL ALGORITMO -->
-        <div class="bg-slate-800 p-6 rounded-xl border border-slate-700">
-            <h2 class="text-lg font-bold mb-4 text-slate-200">🧪 Salud Cuantitativa y Eficiencia (KPIs)</h2>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
-                <div class="bg-slate-900/60 p-4 rounded-lg border border-slate-700/50">
-                    <p class="text-xs text-slate-400 uppercase font-semibold">Tasa de Acierto (Win Rate)</p>
-                    <p id="kpi-winrate" class="text-2xl font-bold mt-1 text-emerald-400">100.0%</p>
-                    <p class="text-xs text-slate-500 mt-1">% de operaciones en ganancia</p>
-                </div>
-                <div class="bg-slate-900/60 p-4 rounded-lg border border-slate-700/50">
-                    <p class="text-xs text-slate-400 uppercase font-semibold">Factor de Beneficio (Profit Factor)</p>
-                    <p id="kpi-profit-factor" class="text-2xl font-bold mt-1 text-indigo-400">N/A</p>
-                    <p class="text-xs text-slate-500 mt-1">Dólares ganados / perdedores</p>
-                </div>
-                <div class="bg-slate-900/60 p-4 rounded-lg border border-slate-700/50">
-                    <p class="text-xs text-slate-400 uppercase font-semibold">Máximo Desplome (Max Drawdown)</p>
-                    <p id="kpi-drawdown" class="text-2xl font-bold mt-1 text-slate-200">0.00%</p>
-                    <p class="text-xs text-slate-500 mt-1">Riesgo de caída histórico</p>
-                </div>
-            </div>
-        </div>
-
-        <!-- MÉTRICAS DE RENDIMIENTO TEMPORAL -->
-        <div class="bg-slate-800 p-6 rounded-xl border border-slate-700">
-            <h2 class="text-lg font-bold mb-4 text-slate-200">📊 Rendimiento Acumulado del Fondo</h2>
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
-                <div class="bg-slate-900/60 p-4 rounded-lg border border-slate-700/50">
-                    <p class="text-xs text-slate-400">Hoy</p>
-                    <p id="roi-hoy" class="text-xl font-bold mt-1 text-slate-300">0.00%</p>
-                </div>
-                <div class="bg-slate-900/60 p-4 rounded-lg border border-slate-700/50">
-                    <p class="text-xs text-slate-400">Esta Semana</p>
-                    <p id="roi-semana" class="text-xl font-bold mt-1 text-slate-300">0.00%</p>
-                </div>
-                <div class="bg-slate-900/60 p-4 rounded-lg border border-slate-700/50">
-                    <p class="text-xs text-slate-400">Este Mes</p>
-                    <p id="roi-mes" class="text-xl font-bold mt-1 text-slate-300">0.00%</p>
-                </div>
-                <div class="bg-slate-900/60 p-4 rounded-lg border border-slate-700/50">
-                    <p class="text-xs text-slate-400">Este Año</p>
-                    <p id="roi-ano" class="text-xl font-bold mt-1 text-slate-300">0.00%</p>
-                </div>
-            </div>
-        </div>
-
-        <!-- CARTERA PERSISTENTE -->
-        <div class="bg-slate-800 p-6 rounded-xl border border-slate-700">
-            <h2 class="text-lg font-bold mb-4 text-slate-200">💼 Cartera Activa Multi-Slot (`posiciones.json`)</h2>
-            <div class="overflow-x-auto">
-                <table class="w-full text-left text-sm text-slate-300">
-                    <thead class="bg-slate-900 text-slate-400 uppercase text-xs">
-                        <tr>
-                            <th class="p-3">Ticker</th>
-                            <th class="p-3">Precio Entrada</th>
-                            <th class="p-3">Monto USD</th>
-                            <th class="p-3">Stop Loss</th>
-                            <th class="p-3">Take Profit</th>
-                            <th class="p-3">Estado SL</th>
-                        </tr>
-                    </thead>
-                    <tbody id="tabla-posiciones" class="divide-y divide-slate-700">
-                        <tr><td colspan="6" class="p-4 text-center text-slate-500">Sin posiciones abiertas actualmente</td></tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-
-        <!-- HISTORIAL DE DECISIONES DE LA IA -->
-        <div class="bg-slate-800 p-6 rounded-xl border border-slate-700">
-            <h2 class="text-lg font-bold mb-4 text-slate-200">🧠 Matriz de Razonamiento y Decisiones IA</h2>
-            <div id="lista-decisiones" class="space-y-4 max-h-96 overflow-y-auto pr-2">
-                <p class="text-slate-500 text-sm">Cargando historial de decisiones...</p>
-            </div>
-        </div>
-
     </div>
 
-    <script>
-        let chartInstancia = null;
+    <!-- Gráfica de Capital -->
+    <div class="card">
+        <div class="kpi-title">📈 Curva de Crecimiento del Capital (Bola de Nieve)</div>
+        <canvas id="capitalChart" height="80"></canvas>
+    </div>
 
-        async function cargarDashboard() {
-            try {
-                const resHist = await fetch('historial.json?t=' + Date.now());
-                const resPos = await fetch('posiciones.json?t=' + Date.now());
-                
-                const historial = await resHist.json();
-                const posiciones = await resPos.json();
+    <!-- Metricas de Balance principal + Nuevo Contador de Trades -->
+    <div class="grid-kpi">
+        <div class="card">
+            <div class="kpi-title">Capital Inicial</div>
+            <div class="kpi-value" id="cap-inicial">$3300.00</div>
+        </div>
+        <div class="card">
+            <div class="kpi-title">Valor Cartera Actual</div>
+            <div class="kpi-value" id="cap-actual">$3300.00</div>
+        </div>
+        <div class="card">
+            <div class="kpi-title">Profit / Loss Neto</div>
+            <div class="kpi-value" id="pnl-neto">+$0.00 (0.00%)</div>
+        </div>
+        <div class="card">
+            <div class="kpi-title">Posiciones Abiertas</div>
+            <div class="kpi-value" id="pos-abiertas">0 / 4</div>
+        </div>
+        <!-- KPI: Contador de Operaciones para Fase Adaptativa -->
+        <div class="card">
+            <div class="kpi-title">Operaciones Cerradas</div>
+            <div class="kpi-value text-purple" id="total-trades">0 / 100</div>
+            <div class="kpi-subtext" id="trades-progress">Progreso: 0% para calibración</div>
+        </div>
+    </div>
 
-                const capInicial = historial.capital_inicial || 3300.0;
-                document.getElementById('cap-inicial').innerText = `$${capInicial.toFixed(2)}`;
-                
-                const registros = historial.registro_saldo || [];
-                const ultimaEntrada = registros[registros.length - 1] || { saldo: capInicial, fecha: new Date().toISOString() };
-                const saldoActual = ultimaEntrada.saldo;
-                
-                document.getElementById('cap-actual').innerText = `$${saldoActual.toFixed(2)}`;
-                document.getElementById('ultima-actualizacion').innerText = `Última ejec: ${new Date(ultimaEntrada.fecha).toLocaleString()}`;
+    <!-- Salud Cuantitativa -->
+    <div class="card">
+        <div class="kpi-title">🧪 Salud Cuantitativa y Eficiencia (KPIs)</div>
+        <div class="grid-kpi" style="margin-top: 10px;">
+            <div>
+                <div class="kpi-subtext">TASA DE ACIERTO (WIN RATE)</div>
+                <div class="kpi-value text-green" id="win-rate">0.0%</div>
+                <div class="kpi-subtext">% de operaciones en ganancia</div>
+            </div>
+            <div>
+                <div class="kpi-subtext">FACTOR DE BENEFICIO (PROFIT FACTOR)</div>
+                <div class="kpi-value" id="profit-factor">0.00</div>
+                <div class="kpi-subtext">Dólares ganados / perdedores</div>
+            </div>
+            <div>
+                <div class="kpi-subtext">MÁXIMO DESPLOME (MAX DRAWDOWN)</div>
+                <div class="kpi-value text-red" id="max-drawdown">0.00%</div>
+                <div class="kpi-subtext">Riesgo de caída histórico</div>
+            </div>
+        </div>
+    </div>
 
-                const diff = saldoActual - capInicial;
-                const pctTotal = (diff / capInicial) * 100;
-                const elProfit = document.getElementById('profit-neto');
-                elProfit.innerText = `${diff >= 0 ? '+' : ''}$${diff.toFixed(2)} (${pctTotal.toFixed(2)}%)`;
-                elProfit.className = `text-2xl font-bold mt-1 ${diff >= 0 ? 'text-emerald-400' : 'text-rose-400'}`;
+    <!-- Cartera Activa -->
+    <div class="card">
+        <div class="kpi-title">💼 Cartera Activa Multi-Slot (`posiciones.json`)</div>
+        <table>
+            <thead>
+                <tr>
+                    <th>Ticker</th>
+                    <th>Precio Entrada</th>
+                    <th>Monto USD</th>
+                    <th>Stop Loss</th>
+                    <th>Take Profit</th>
+                    <th>Estado SL</th>
+                </tr>
+            </thead>
+            <tbody id="tabla-posiciones">
+                <tr><td colspan="6" style="text-align: center;">Cargando posiciones...</td></tr>
+            </tbody>
+        </table>
+    </div>
 
-                calcularROIs(registros, capInicial, saldoActual);
-                calcularKPIs(historial.decisiones || [], registros, capInicial);
-                renderizarGrafico(registros, capInicial);
+    <!-- Matriz de Decisiones de IA -->
+    <div class="card">
+        <div class="kpi-title">🧠 Matriz de Razonamiento y Decisiones IA</div>
+        <div class="matrix-log" id="log-decisiones">
+            <div class="log-item">Cargando historial de ejecuciones...</div>
+        </div>
+    </div>
+</div>
 
-                document.getElementById('total-posiciones').innerText = `${posiciones.length} / 4`;
-                const tablaPos = document.getElementById('tabla-posiciones');
-                if(posiciones.length > 0) {
-                    tablaPos.innerHTML = posiciones.map(p => `
-                        <tr class="hover:bg-slate-750">
-                            <td class="p-3 font-bold text-emerald-400">${p.ticker}</td>
-                            <td class="p-3">$${p.precio_entrada}</td>
-                            <td class="p-3 font-semibold text-slate-200">$${p.monto_usd ? p.monto_usd.toFixed(2) : '-'}</td>
-                            <td class="p-3 text-rose-400">$${p.stop_loss}</td>
-                            <td class="p-3 text-emerald-400">$${p.take_profit}</td>
-                            <td class="p-3">
-                                <span class="px-2 py-0.5 rounded text-xs font-bold ${p.break_even ? 'bg-indigo-500/20 text-indigo-400' : 'bg-slate-700 text-slate-300'}">
-                                    ${p.break_even ? 'Break-Even' : 'Riesgo Inicial (1.5% R)'}
-                                </span>
-                            </td>
-                        </tr>
-                    `).join('');
-                } else {
-                    tablaPos.innerHTML = `<tr><td colspan="6" class="p-4 text-center text-slate-500">Sin posiciones abiertas en este momento</td></tr>`;
-                }
+<script>
+    let capitalChart = null;
 
-                const listaDec = document.getElementById('lista-decisiones');
-                const decisiones = historial.decisiones || [];
-                if(decisiones.length > 0) {
-                    listaDec.innerHTML = decisiones.slice().reverse().map(d => `
-                        <div class="bg-slate-900/70 p-4 rounded-lg border border-slate-700/60">
-                            <div class="flex justify-between items-center mb-2">
-                                <span class="text-xs font-mono text-slate-400">${new Date(d.fecha).toLocaleString()}</span>
-                                <span class="px-2 py-0.5 rounded text-xs font-bold ${d.accion === 'COMPRAR' ? 'bg-emerald-500/20 text-emerald-400' : d.accion === 'VENDER' ? 'bg-rose-500/20 text-rose-400' : 'bg-slate-700 text-slate-300'}">${d.accion}</span>
-                            </div>
-                            <p class="text-sm text-slate-200 font-medium">${d.resumen}</p>
-                        </div>
-                    `).join('');
-                } else {
-                    listaDec.innerHTML = `<p class="text-slate-500 text-sm">Aún no hay registros de decisiones en el historial.</p>`;
-                }
+    async function cargarDashboard() {
+        try {
+            // Cargar datos del historial y posiciones
+            const resHistorial = await fetch('historial.json?v=' + new Date().getTime());
+            const historial = await resHistorial.json();
 
-            } catch (err) {
-                console.error("Error cargando dashboard:", err);
+            const resPosiciones = await fetch('posiciones.json?v=' + new Date().getTime());
+            const posiciones = await resPosiciones.json();
+
+            actualizarMetricasYTabla(historial, posiciones);
+            actualizarGrafico(historial);
+            actualizarContadorTrades(historial);
+        } catch (e) {
+            console.error("Error cargando los archivos JSON:", e);
+        }
+    }
+
+    function actualizarContadorTrades(historialData) {
+        // Filtrar trades cerrados (ventas / stop loss / take profit)
+        const tradesCerrados = historialData.filter(item => 
+            item.accion && (
+                item.accion.includes('STOP_LOSS') || 
+                item.accion.includes('TAKE_PROFIT') || 
+                item.accion.includes('VENTA')
+            )
+        ).length;
+
+        const meta = 100;
+        const porcentaje = Math.min(((tradesCerrados / meta) * 100), 100).toFixed(1);
+
+        document.getElementById('total-trades').innerText = `${tradesCerrados} / ${meta}`;
+        document.getElementById('trades-progress').innerText = `Progreso: ${porcentaje}% hacia Fase Adaptativa`;
+    }
+
+    function actualizarMetricasYTabla(historial, posiciones) {
+        if (!historial || historial.length === 0) return;
+
+        const ultimoRegistro = historial[historial.length - 1];
+        
+        // Header e Info general
+        document.getElementById('last-update').innerText = `Última ejec: ${ultimoRegistro.timestamp || '--'}`;
+        document.getElementById('cap-actual').innerText = `$${(ultimoRegistro.capital || 3300).toFixed(2)}`;
+        
+        const pnl = (ultimoRegistro.capital || 3300) - 3300;
+        const pnlPct = (pnl / 3300) * 100;
+        const pnlElem = document.getElementById('pnl-neto');
+        pnlElem.innerText = `${pnl >= 0 ? '+' : ''}$${pnl.toFixed(2)} (${pnlPct.toFixed(2)}%)`;
+        pnlElem.className = `kpi-value ${pnl >= 0 ? 'text-green' : 'text-red'}`;
+
+        // Posiciones activas
+        const totalPos = Object.keys(posiciones).length;
+        document.getElementById('pos-abiertas').innerText = `${totalPos} / 4`;
+
+        const tbody = document.getElementById('tabla-posiciones');
+        tbody.innerHTML = '';
+
+        if (totalPos === 0) {
+            tbody.innerHTML = '<tr><td colspan="6" style="text-align: center;">Sin posiciones abiertas. 100% Liquidez en USD.</td></tr>';
+        } else {
+            for (const [ticker, pos] of Object.entries(posiciones)) {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td class="text-green" style="font-weight: bold;">${ticker}</td>
+                    <td>$${pos.precio_entrada}</td>
+                    <td>$${pos.monto_usd.toFixed(2)}</td>
+                    <td class="text-red">$${pos.stop_loss}</td>
+                    <td class="text-green">$${pos.take_profit}</td>
+                    <td><span class="log-badge">${pos.estado_sl || 'Riesgo Inicial'}</span></td>
+                `;
+                tbody.appendChild(tr);
             }
         }
 
-        function calcularKPIs(decisiones, registros, capInicial) {
-            let ganadoras = 0, perdedoras = 0;
-            let profitTotal = 0, lossTotal = 0;
+        // Matriz de razonamiento
+        const logContainer = document.getElementById('log-decisiones');
+        logContainer.innerHTML = '';
+        
+        // Mostrar los ultimos logs en orden inverso
+        const ultimosLogs = [...historial].reverse().slice(0, 15);
+        ultimosLogs.forEach(log => {
+            const item = document.createElement('div');
+            item.className = 'log-item';
+            item.innerHTML = `
+                <div class="log-header">
+                    <span>${log.timestamp}</span>
+                    <span class="log-badge">${log.accion || 'MANTENER'}</span>
+                </div>
+                <div>${log.razonamiento || 'Sin registros de razonamiento.'}</div>
+            `;
+            logContainer.appendChild(item);
+        });
+    }
 
-            decisiones.forEach(d => {
-                const p = parseFloat(d.profit_cerrado_usd || 0);
-                if (p > 0) {
-                    ganadoras++;
-                    profitTotal += p;
-                } else if (p < 0) {
-                    perdedoras++;
-                    lossTotal += Math.abs(p);
+    function actualizarGrafico(historial) {
+        const labels = historial.map(h => h.timestamp ? h.timestamp.split(', ')[1] || h.timestamp : '');
+        const dataCapital = historial.map(h => h.capital || 3300);
+
+        const ctx = document.getElementById('capitalChart').getContext('2d');
+
+        if (capitalChart) capitalChart.destroy();
+
+        capitalChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Capital Total (USD)',
+                    data: dataCapital,
+                    borderColor: '#10b981',
+                    backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                    fill: true,
+                    tension: 0.2,
+                    pointRadius: 3
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: { legend: { display: false } },
+                scales: {
+                    x: { ticks: { color: '#94a3b8' }, grid: { color: '#334155' } },
+                    y: { ticks: { color: '#94a3b8' }, grid: { color: '#334155' } }
                 }
-            });
-
-            const totalCerradas = ganadoras + perdedoras;
-            const winRate = totalCerradas > 0 ? (ganadoras / totalCerradas) * 100 : 100;
-            document.getElementById('kpi-winrate').innerText = `${winRate.toFixed(1)}%`;
-
-            const profitFactor = lossTotal > 0 ? (profitTotal / lossTotal).toFixed(2) : (profitTotal > 0 ? "∞" : "N/A");
-            document.getElementById('kpi-profit-factor').innerText = profitFactor;
-
-            // Calcular Max Drawdown
-            let maxPeak = capInicial;
-            let maxDrawdown = 0;
-
-            registros.forEach(r => {
-                if (r.saldo > maxPeak) {
-                    maxPeak = r.saldo;
-                }
-                const dd = ((maxPeak - r.saldo) / maxPeak) * 100;
-                if (dd > maxDrawdown) {
-                    maxDrawdown = dd;
-                }
-            });
-
-            const elDD = document.getElementById('kpi-drawdown');
-            elDD.innerText = `${maxDrawdown.toFixed(2)}%`;
-            elDD.className = `text-2xl font-bold mt-1 ${maxDrawdown > 5 ? 'text-rose-400' : 'text-slate-200'}`;
-        }
-
-        function renderizarGrafico(registros, capInicial) {
-            const ctx = document.getElementById('graficoSaldo').getContext('2d');
-            
-            const etiquetas = registros.map(r => new Date(r.fecha).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
-            const datosSaldo = registros.map(r => r.saldo);
-
-            if(etiquetas.length === 0) {
-                etiquetas.push("Inicio");
-                datosSaldo.push(capInicial);
             }
+        });
+    }
 
-            if (chartInstancia) {
-                chartInstancia.destroy();
-            }
-
-            chartInstancia = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: etiquetas,
-                    datasets: [{
-                        label: 'Saldo Cartera (USD)',
-                        data: datosSaldo,
-                        borderColor: '#10b981',
-                        backgroundColor: 'rgba(16, 185, 129, 0.1)',
-                        fill: true,
-                        tension: 0.3,
-                        pointRadius: 4,
-                        pointBackgroundColor: '#10b981'
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: { legend: { display: false } },
-                    scales: {
-                        x: { grid: { color: 'rgba(51, 65, 85, 0.3)' }, ticks: { color: '#94a3b8' } },
-                        y: { grid: { color: 'rgba(51, 65, 85, 0.3)' }, ticks: { color: '#94a3b8' } }
-                    }
-                }
-            });
-        }
-
-        function calcularROIs(registros, capInicial, saldoActual) {
-            const ahora = new Date();
-            const hace24h = new Date(ahora - 24*60*60*1000);
-            const hace7d = new Date(ahora - 7*24*60*60*1000);
-            const hace30d = new Date(ahora - 30*24*60*60*1000);
-            const hace365d = new Date(ahora - 365*24*60*60*1000);
-
-            const buscarSaldoMasCercano = (fechaLimite) => {
-                const reg = registros.find(r => new Date(r.fecha) >= fechaLimite);
-                return reg ? reg.saldo : capInicial;
-            };
-
-            setROI('roi-hoy', saldoActual, buscarSaldoMasCercano(hace24h));
-            setROI('roi-semana', saldoActual, buscarSaldoMasCercano(hace7d));
-            setROI('roi-mes', saldoActual, buscarSaldoMasCercano(hace30d));
-            setROI('roi-ano', saldoActual, buscarSaldoMasCercano(hace365d));
-        }
-
-        function setROI(id, actual, base) {
-            const pct = ((actual - base) / base) * 100;
-            const el = document.getElementById(id);
-            el.innerText = `${pct >= 0 ? '+' : ''}${pct.toFixed(2)}%`;
-            el.className = `text-xl font-bold mt-1 ${pct >= 0 ? 'text-emerald-400' : 'text-rose-400'}`;
-        }
-
-        cargarDashboard();
-    </script>
+    // Inicializar dashboard al cargar la página
+    window.onload = cargarDashboard;
+</script>
 </body>
 </html>
