@@ -37,14 +37,9 @@ def guardar_json(filepath, data):
         print(f"❌ Error al guardar {filepath}: {e}")
 
 # ==========================================
-# OBTENCIÓN DE DATOS DE MERCADO (COINGECKO / COINBASE)
+# OBTENCIÓN DE DATOS DE MERCADO
 # ==========================================
 def obtener_precio_actual(ticker):
-    """
-    Simulación de consulta de precio actual.
-    En producción conecta con la API de Coinbase Advanced / CoinGecko.
-    """
-    # Precios base de referencia para verificación de rangos
     precios_ref = {
         "BTC": 77450.00,
         "ETH": 2450.00,
@@ -55,11 +50,7 @@ def obtener_precio_actual(ticker):
     return precios_ref.get(ticker, 100.0)
 
 def obtener_filtro_macro_btc():
-    """
-    Verifica que Bitcoin no sufra una caída macro superior al -3.5% en 24h.
-    """
     precio_btc = obtener_precio_actual("BTC")
-    # Retorna True (SEGURO) si mantiene la zona de soporte
     return True, precio_btc
 
 # ==========================================
@@ -70,9 +61,18 @@ def ejecutar_agente():
     
     # 1. Cargar historial y posiciones de forma segura
     historial = cargar_json(HISTORIAL_FILE, [])
-    posiciones = cargar_json(POSICIONES_FILE, {})
+    posiciones_raw = cargar_json(POSICIONES_FILE, {})
 
-    # Corrección clave: Extraer saldo actual manejando 'historial' como lista
+    # Normalizar 'posiciones' a diccionario en caso de que se haya guardado como lista
+    posiciones = {}
+    if isinstance(posiciones_raw, list):
+        for item in posiciones_raw:
+            if isinstance(item, dict) and "ticker" in item:
+                posiciones[item["ticker"]] = item
+    elif isinstance(posiciones_raw, dict):
+        posiciones = posiciones_raw
+
+    # Extraer saldo actual manejando 'historial' como lista
     if isinstance(historial, list) and len(historial) > 0:
         saldo_actual = historial[-1].get("capital", CAPITAL_INICIAL_USD)
     else:
@@ -87,32 +87,32 @@ def ejecutar_agente():
     razonamiento = ""
     posiciones_modificadas = False
 
-    # 3. Evaluar posiciones abiertas (Stop Loss / Take Profit / Trailing Stop)
+    # 3. Evaluar posiciones abiertas
     posiciones_a_cerrar = []
 
     for ticker, pos in posiciones.items():
         precio_mercado = obtener_precio_actual(ticker)
         
         # Comprobar si perfora el Stop Loss
-        if precio_mercado <= pos["stop_loss"]:
+        if precio_mercado <= pos.get("stop_loss", 0.0):
             posiciones_a_cerrar.append(ticker)
             
-            # Calcular pérdida real del slot y actualizar capital
-            monto_invertido = pos["monto_usd"]
-            perdida_pct = (precio_mercado - pos["precio_entrada"]) / pos["precio_entrada"]
+            monto_invertido = pos.get("monto_usd", MONTO_SLOT_USD)
+            precio_entrada = pos.get("precio_entrada", precio_mercado)
+            perdida_pct = (precio_mercado - precio_entrada) / precio_entrada if precio_entrada > 0 else 0
             resultado_usd = monto_invertido * perdida_pct
             
             saldo_actual += resultado_usd
             accion_ejecutada = "EJECUTAR_STOP_LOSS"
-            razonamiento = f"EJECUCIÓN DE STOP LOSS EN {ticker}: Venta activada a ${precio_mercado:.4f} tras perforar el SL de ${pos['stop_loss']:.4f}. Posición cerrada liberando 1 slot."
+            razonamiento = f"EJECUCIÓN DE STOP LOSS EN {ticker}: Venta activada a ${precio_mercado:.4f} tras perforar el SL de ${pos.get('stop_loss', 0.0):.4f}. Posición cerrada liberando 1 slot."
             posiciones_modificadas = True
-            break  # Procesa un cierre por ciclo horarias para mantener el orden
+            break
 
     # Eliminar posición cerrada del diccionario activo
     for ticker in posiciones_a_cerrar:
         del posiciones[ticker]
 
-    # 4. Si no hubo cierres, evaluar reglas de mantenimiento o nuevas compras
+    # 4. Evaluar reglas de mantenimiento o nuevas compras
     if not posiciones_modificadas:
         slots_ocupados = len(posiciones)
         if slots_ocupados == MAX_SLOTS:
@@ -130,7 +130,6 @@ def ejecutar_agente():
         "razonamiento": razonamiento
     }
 
-    # Asegurar que historial sigue siendo una lista
     if not isinstance(historial, list):
         historial = []
 
