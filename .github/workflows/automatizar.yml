@@ -23,9 +23,11 @@ jobs:
       - name: Instalar librerias
         run: |
           python -m pip install --upgrade pip
-          pip install google-genai requests
+          pip install google-genai requests pandas
 
-      - name: Ejecutar Agente
+      # Se ejecuta de forma automática cada hora (Cron)
+      - name: Ejecutar Agente en Vivo
+        if: github.event_name == 'schedule'
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           EMAIL_ORIGEN: ${{ secrets.EMAIL_ORIGEN }}
@@ -33,7 +35,13 @@ jobs:
           EMAIL_DESTINO: ${{ secrets.EMAIL_DESTINO }}
         run: python main.py
 
+      # Se ejecuta ÚNICAMENTE cuando le das al botón "Run workflow" manualmente
+      - name: Ejecutar Backtesting (100 Trades)
+        if: github.event_name == 'workflow_dispatch'
+        run: python backtest.py
+
       - name: Guardar Historial, Dashboard y Seguimiento
+        if: github.event_name == 'schedule'
         run: |
           git config --global user.name 'github-actions[bot]'
           git config --global user.email 'github-actions[bot]@users.noreply.github.com'
