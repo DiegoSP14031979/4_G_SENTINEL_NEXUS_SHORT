@@ -14,7 +14,6 @@ TICKERS = ["bitcoin", "ethereum", "solana", "ripple", "dogecoin"]
 print("🔄 Descargando datos de alta densidad para Optimización de CORE...")
 
 def obtener_datos_hora(coin_id):
-    # Obtiene datos de los últimos 90 días en resolución horaria (2,160 registros por activo)
     url = f"https://api.coingecko.com/api/v3/coins/{coin_id}/market_chart?vs_currency=usd&days=90"
     try:
         res = requests.get(url, timeout=15)
@@ -33,7 +32,7 @@ for t in TICKERS:
     if not df.empty:
         datos[t] = df
 
-print("⚡ Simulado backtest adaptativo (Malla de 2,000+ comprobaciones)...")
+print("⚡ Simulando backtest adaptativo (Malla de 2,000+ comprobaciones)...")
 
 # ==========================================
 # MOTOR ADAPTATIVO (ATR + FILTRO EMA 200)
@@ -44,7 +43,7 @@ posiciones = {}
 
 min_len = min([len(df) for df in datos.values()])
 
-for i in range(200, min_len):  # Se reservan 200 periodos para la EMA 200
+for i in range(200, min_len):  # Reservamos 200 periodos para la EMA 200
     fecha = datos["bitcoin"].iloc[i]["date"].strftime("%Y-%m-%d %H:%M")
     tickers_cerrar = []
 
@@ -77,15 +76,16 @@ for i in range(200, min_len):  # Se reservan 200 periodos para la EMA 200
             precios_historicos = datos[ticker]["price"].iloc[i-200:i].values
             precio_actual = datos[ticker].iloc[i]["price"]
             
-            # Indicadores Adaptativos
-            ema_200 = np.mean(precios_historicos[-200:])
-            retornos = np.abs(np.diff(precios_historicos[-14:]) / precios_historicos[-15:-1])
+            # Cálculo de retornos corregido con dimensiones idénticas
+            p_slice = precios_historicos[-15:]
+            retornos = np.abs(np.diff(p_slice) / p_slice[:-1])
             atr_pct = float(np.mean(retornos))
             
             # Dinámica ATR: SL adaptado a la volatilidad real
             sl_pct = max(0.025, min(0.05, atr_pct * 1.5))
             
-            # Régimen de Mercado: Solo comprar en Bull o rebote confirmado sobre EMA 200
+            # Régimen de Mercado: Solo comprar en Bull o rebote sobre EMA 200
+            ema_200 = np.mean(precios_historicos[-200:])
             regimen_bull = precio_actual > ema_200
             impulso = (precio_actual - precios_historicos[-2]) / precios_historicos[-2]
 
