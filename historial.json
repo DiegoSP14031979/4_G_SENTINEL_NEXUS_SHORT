@@ -220,5 +220,11 @@
         "capital": 3259.04,
         "accion": "MANTENER",
         "razonamiento": "Cartera con 3/4 slots ocupados. Guardián adaptativo activo."
+    },
+    {
+        "timestamp": "26/08/2026, 10:55:05",
+        "capital": 3259.04,
+        "accion": "COMPRA_XRP",
+        "razonamiento": "ENTRADA EN XRP: Confirmada tendencia alcista > EMA 200 e impulso de +1.57%. SL a -2.5% | TP a +5.5%."
     }
 ]
