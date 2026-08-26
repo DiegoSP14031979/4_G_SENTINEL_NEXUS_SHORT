@@ -1,23 +1,26 @@
 {
-  "SOL": {
-    "precio_entrada": 95.38,
-    "monto_usd": 825.0,
-    "stop_loss": 89.66,
-    "take_profit": 106.83,
-    "estado_sl": "Riesgo Inicial (1.5% R)"
-  },
-  "BTC": {
-    "precio_entrada": 77538.26,
-    "monto_usd": 825.0,
-    "stop_loss": 75212.11,
-    "take_profit": 82190.55,
-    "estado_sl": "Riesgo Inicial (1.5% R)"
-  },
-  "ETH": {
-    "precio_entrada": 2457.38,
-    "monto_usd": 825.0,
-    "stop_loss": 2395.95,
-    "take_profit": 2604.82,
-    "estado_sl": "Riesgo Inicial (1.5% R)"
-  }
+    "SOL": {
+        "precio_entrada": 95.38,
+        "monto_usd": 825.0,
+        "stop_loss": 89.66,
+        "take_profit": 106.83,
+        "estado_sl": "Riesgo Inicial (1.5% R)",
+        "precio_actual": 96.9101
+    },
+    "BTC": {
+        "precio_entrada": 77538.26,
+        "monto_usd": 825.0,
+        "stop_loss": 75212.11,
+        "take_profit": 82190.55,
+        "estado_sl": "Riesgo Inicial (1.5% R)",
+        "precio_actual": 79023.8094
+    },
+    "ETH": {
+        "precio_entrada": 2457.38,
+        "monto_usd": 825.0,
+        "stop_loss": 2395.95,
+        "take_profit": 2604.82,
+        "estado_sl": "Riesgo Inicial (1.5% R)",
+        "precio_actual": 2464.9928
+    }
 }
