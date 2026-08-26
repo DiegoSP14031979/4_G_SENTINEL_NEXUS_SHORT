@@ -214,5 +214,11 @@
         "capital": 3259.04,
         "accion": "MANTENER",
         "razonamiento": "Cartera con 3/4 slots ocupados. Guardián adaptativo activo."
+    },
+    {
+        "timestamp": "26/08/2026, 08:10:00",
+        "capital": 3259.04,
+        "accion": "MANTENER",
+        "razonamiento": "Cartera con 3/4 slots ocupados. Guardián adaptativo activo."
     }
 ]

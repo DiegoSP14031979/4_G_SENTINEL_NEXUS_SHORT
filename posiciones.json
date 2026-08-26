@@ -5,7 +5,7 @@
         "stop_loss": 89.66,
         "take_profit": 106.83,
         "estado_sl": "Riesgo Inicial (1.5% R)",
-        "precio_actual": 96.9101
+        "precio_actual": 97.0037
     },
     "BTC": {
         "precio_entrada": 77538.26,
@@ -13,7 +13,7 @@
         "stop_loss": 75212.11,
         "take_profit": 82190.55,
         "estado_sl": "Riesgo Inicial (1.5% R)",
-        "precio_actual": 79023.8094
+        "precio_actual": 78864.3337
     },
     "ETH": {
         "precio_entrada": 2457.38,
@@ -21,6 +21,6 @@
         "stop_loss": 2395.95,
         "take_profit": 2604.82,
         "estado_sl": "Riesgo Inicial (1.5% R)",
-        "precio_actual": 2464.9928
+        "precio_actual": 2461.1146
     }
 }
