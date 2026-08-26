@@ -232,5 +232,11 @@
         "capital": 3259.04,
         "accion": "MANTENER",
         "razonamiento": "Cartera con 4/4 slots ocupados. Guardián adaptativo activo."
+    },
+    {
+        "timestamp": "26/08/2026, 16:37:15",
+        "capital": 3227.64,
+        "accion": "EJECUTAR_STOP_LOSS",
+        "razonamiento": "VENTA SL (XRP): Salida adaptativa ejecutada a $1.3771."
     }
 ]
