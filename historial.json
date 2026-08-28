@@ -238,5 +238,11 @@
         "capital": 3227.64,
         "accion": "EJECUTAR_STOP_LOSS",
         "razonamiento": "VENTA SL (XRP): Salida adaptativa ejecutada a $1.3771."
+    },
+    {
+        "timestamp": "28/08/2026, 01:31:05",
+        "capital": 3349.81,
+        "accion": "COMPRA_XRP",
+        "razonamiento": "ENTRADA EN XRP: Confirmada tendencia alcista > EMA 200 e impulso de +1.29%. SL a -2.5% | TP a +5.5%."
     }
 ]
