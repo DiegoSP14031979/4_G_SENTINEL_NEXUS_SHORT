@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>G-SENTINEL // NEXUS SHORT</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
             --bg-color: #0b0f19;
@@ -18,21 +19,32 @@
         body { background-color: var(--bg-color); color: var(--text-main); font-family: monospace; margin: 0; padding: 20px; }
         .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--accent-red); padding-bottom: 10px; margin-bottom: 20px; }
         .header h1 { margin: 0; font-size: 20px; color: var(--accent-red); letter-spacing: 1px; }
-        .grid-kpi { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 25px; }
+        
+        .grid-kpi { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; margin-bottom: 25px; }
         .card { background: var(--panel-bg); border: 1px solid var(--border-color); border-radius: 6px; padding: 15px; }
         .card-title { font-size: 11px; color: var(--text-muted); text-transform: uppercase; }
-        .card-value { font-size: 22px; font-weight: bold; margin: 8px 0; color: #fff; }
-        table { width: 100%; border-collapse: collapse; background: var(--panel-bg); border: 1px solid var(--border-color); border-radius: 6px; margin-bottom: 20px; }
+        .card-value { font-size: 20px; font-weight: bold; margin: 8px 0; color: #fff; }
+        
+        .chart-container { background: var(--panel-bg); border: 1px solid var(--border-color); border-radius: 6px; padding: 15px; margin-bottom: 25px; height: 250px; }
+        
+        table { width: 100%; border-collapse: collapse; background: var(--panel-bg); border: 1px solid var(--border-color); border-radius: 6px; margin-bottom: 25px; }
         th, td { padding: 10px; text-align: left; border-bottom: 1px solid var(--border-color); font-size: 12px; }
         th { color: var(--text-muted); text-transform: uppercase; font-size: 10px; background: #1c2128; }
+        
+        .section-title { color: var(--accent-red); font-weight: bold; margin-bottom: 10px; font-size: 14px; text-transform: uppercase; }
+        .logs-container { background: var(--panel-bg); border: 1px solid var(--border-color); border-radius: 6px; padding: 15px; max-height: 250px; overflow-y: auto; font-size: 12px; }
+        .log-entry { border-bottom: 1px solid #21262d; padding: 6px 0; }
+        .log-time { color: var(--accent-blue); margin-right: 8px; }
     </style>
 </head>
 <body>
+
     <div class="header">
         <h1>G-SENTINEL // NEXUS SHORT (PATA 4)</h1>
         <span id="last-update" style="color: var(--text-muted); font-size: 12px;">Cargando...</span>
     </div>
 
+    <!-- MÉTIRCAS KPIS RECUPERADAS -->
     <div class="grid-kpi">
         <div class="card">
             <div class="card-title">Estrategia</div>
@@ -43,52 +55,144 @@
             <div class="card-value" id="slots-count">0 / 4</div>
         </div>
         <div class="card">
-            <div class="card-title">Filtro Tendencial</div>
-            <div class="card-value" style="color:var(--accent-blue)">Precio < EMA 200</div>
+            <div class="card-title">Capital Actual</div>
+            <div class="card-value" id="capital-val">$3300.00</div>
+        </div>
+        <div class="card">
+            <div class="card-title">Tasa Acierto (Win Rate)</div>
+            <div class="card-value" id="win-rate" style="color:var(--accent-green)">0.0%</div>
+        </div>
+        <div class="card">
+            <div class="card-title">Profit Factor</div>
+            <div class="card-value" id="profit-factor" style="color:var(--accent-blue)">0.00</div>
         </div>
     </div>
 
-    <div style="color: var(--accent-red); font-weight: bold; margin-bottom: 10px;">MATRIZ DE POSICIONES CORTAS ACTIVAS</div>
+    <!-- GRÁFICO CURVA DE CAPITAL RECUPERADO -->
+    <div class="section-title">CURVA DE CRECIMIENTO DEL CAPITAL</div>
+    <div class="chart-container">
+        <canvas id="equityChart"></canvas>
+    </div>
+
+    <!-- TABLA POSICIONES ACTIVAS -->
+    <div class="section-title">MATRIZ DE POSICIONES CORTAS ACTIVAS</div>
     <table>
         <thead>
             <tr>
                 <th>Activo</th>
                 <th>Precio Entrada</th>
-                <th>Stop Loss (SL %)</th>
-                <th>Take Profit (TP %)</th>
-                <th>Timestamp Entrada</th>
+                <th>Precio Actual</th>
+                <th>Stop Loss</th>
+                <th>Take Profit</th>
+                <th>Estado / Riesgo</th>
             </tr>
         </thead>
         <tbody id="pos-table">
-            <tr><td colspan="5" style="text-align: center; color: var(--text-muted);">Buscando señales cortas en el mercado...</td></tr>
+            <tr><td colspan="6" style="text-align: center; color: var(--text-muted);">Buscando señales cortas en el mercado...</td></tr>
         </tbody>
     </table>
 
+    <!-- MATRIZ DE LOGS Y DECISIONES IA RECUPERADA -->
+    <div class="section-title">MATRIZ DE RAZONAMIENTO Y HISTORIAL</div>
+    <div class="logs-container" id="logs-list">
+        <div class="log-entry">Esperando sincronización de registros...</div>
+    </div>
+
     <script>
-        async function loadData() {
+        let chartInstance = null;
+
+        async function loadDashboard() {
+            // 1. Cargar Posiciones Activas con mapeo dual de claves
             try {
                 const res = await fetch('posiciones.json');
-                const data = await res.json();
-                
-                const keys = Object.keys(data);
-                document.getElementById('slots-count').innerText = keys.length + ' / 4';
+                if (res.ok) {
+                    const data = await res.json();
+                    const keys = Object.keys(data);
+                    document.getElementById('slots-count').innerText = keys.length + ' / 4';
 
-                const tbody = document.getElementById('pos-table');
-                if (keys.length > 0) {
-                    tbody.innerHTML = keys.map(k => {
-                        const p = data[k];
-                        return `<tr>
-                            <td><b>${k.toUpperCase()}</b></td>
-                            <td>$${p.entry_price}</td>
-                            <td style="color:var(--accent-red)">-${p.sl_pct}%</td>
-                            <td style="color:var(--accent-green)">+${p.tp_pct}%</td>
-                            <td>${p.timestamp}</td>
-                        </tr>`;
-                    }).join('');
+                    const tbody = document.getElementById('pos-table');
+                    if (keys.length > 0) {
+                        tbody.innerHTML = keys.map(k => {
+                            const p = data[k];
+                            // Compatibilidad de nombres de clave (Español / Inglés)
+                            const entry = p.precio_entrada || p.entry_price || 0;
+                            const current = p.precio_actual || entry;
+                            const sl = p.stop_loss ? `$${p.stop_loss}` : (p.sl_pct ? `-${p.sl_pct}%` : 'N/A');
+                            const tp = p.take_profit ? `$${p.take_profit}` : (p.tp_pct ? `+${p.tp_pct}%` : 'N/A');
+                            const estado = p.estado_sl || 'Riesgo Adaptativo';
+
+                            return `<tr>
+                                <td><b>${k.toUpperCase()}</b></td>
+                                <td>$${entry}</td>
+                                <td style="color:var(--accent-blue)">$${current}</td>
+                                <td style="color:var(--accent-red)">${sl}</td>
+                                <td style="color:var(--accent-green)">${tp}</td>
+                                <td>${estado}</td>
+                            </tr>`;
+                        }).join('');
+                    } else {
+                        tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: var(--text-muted);">Sin posiciones cortas activas.</td></tr>`;
+                    }
                 }
-            } catch (e) { console.log("Sin posiciones activas."); }
+            } catch (e) { console.log("Error posiciones:", e); }
+
+            // 2. Cargar Historial, KPIs y Gráfico
+            try {
+                const resH = await fetch('historial.json');
+                if (resH.ok) {
+                    const historial = await resH.json();
+                    if (historial.length > 0) {
+                        const last = historial[historial.length - 1];
+                        document.getElementById('last-update').innerText = last.timestamp || last.fecha || 'Actualizado';
+                        
+                        if (last.capital) {
+                            document.getElementById('capital-val').innerText = `$${last.capital.toFixed(2)}`;
+                        }
+
+                        // Renderizar Logs en la Matriz
+                        const logsDiv = document.getElementById('logs-list');
+                        logsDiv.innerHTML = historial.slice().reverse().map(h => {
+                            const time = h.timestamp || h.fecha || '';
+                            const text = h.razonamiento || h.result || h.accion || JSON.stringify(h);
+                            return `<div class="log-entry"><span class="log-time">[${time}]</span> ${text}</div>`;
+                        }).join('');
+
+                        // Construir Gráfico
+                        const labels = historial.map(h => h.timestamp || h.fecha || '');
+                        const capitalData = historial.map(h => h.capital || 3300);
+
+                        if (chartInstance) chartInstance.destroy();
+                        const ctx = document.getElementById('equityChart').getContext('2d');
+                        chartInstance = new Chart(ctx, {
+                            type: 'line',
+                            data: {
+                                labels: labels,
+                                datasets: [{
+                                    label: 'Capital ($)',
+                                    data: capitalData,
+                                    borderColor: '#f85149',
+                                    backgroundColor: 'rgba(248, 81, 73, 0.1)',
+                                    fill: true,
+                                    tension: 0.2
+                                }]
+                            },
+                            options: {
+                                responsive: true,
+                                maintainAspectRatio: false,
+                                plugins: { legend: { display: false } },
+                                scales: {
+                                    x: { ticks: { color: '#8b949e', font: { size: 9 } } },
+                                    y: { ticks: { color: '#8b949e' } }
+                                }
+                            }
+                        });
+                    }
+                }
+            } catch (e) { console.log("Error historial:", e); }
         }
-        loadData();
+
+        loadDashboard();
+        setInterval(loadDashboard, 30000); // Auto-refresco cada 30 seg
     </script>
 </body>
 </html>
