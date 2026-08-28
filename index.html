@@ -3,116 +3,139 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>G-SENTINEL // NEXUS ADAPTATIVE</title>
+    <title>G-SENTINEL 4 // NEXUS TRADING SWING</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
-            --bg-color: #0b0f19;
-            --panel-bg: #161b22;
-            --border-color: #30363d;
-            --accent-red: #f85149;
-            --accent-green: #3fb950;
-            --accent-blue: #00f0ff;
-            --accent-purple: #bc8cff;
+            --bg-color: #070a11;
+            --panel-bg: #0d131f;
+            --panel-border: #1a2333;
+            --accent-cyan: #00f0ff;
+            --accent-green: #00ff88;
+            --accent-red: #ff3366;
+            --accent-magenta: #bc8cff;
             --text-main: #c9d1d9;
-            --text-muted: #8b949e;
+            --text-muted: #6e7681;
         }
-        body { background-color: var(--bg-color); color: var(--text-main); font-family: monospace; margin: 0; padding: 20px; }
-        .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--accent-blue); padding-bottom: 10px; margin-bottom: 20px; }
-        .header h1 { margin: 0; font-size: 20px; color: var(--accent-blue); letter-spacing: 1px; }
+        body { background-color: var(--bg-color); color: var(--text-main); font-family: 'Courier New', Courier, monospace; margin: 0; padding: 20px; text-transform: uppercase; }
         
-        .grid-kpi { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; margin-bottom: 25px; }
-        .card { background: var(--panel-bg); border: 1px solid var(--border-color); border-radius: 6px; padding: 12px; }
-        .card-title { font-size: 10px; color: var(--text-muted); text-transform: uppercase; }
-        .card-value { font-size: 18px; font-weight: bold; margin: 6px 0; color: #fff; }
+        .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--accent-cyan); padding-bottom: 12px; margin-bottom: 20px; }
+        .header-title { display: flex; align-items: center; gap: 12px; }
+        .header-badge { background: #00f0ff1a; color: var(--accent-cyan); border: 1px solid var(--accent-cyan); padding: 4px 8px; font-size: 11px; font-weight: bold; border-radius: 3px; }
+        .header h1 { margin: 0; font-size: 18px; color: #fff; letter-spacing: 1.5px; }
+        .status-dot { display: inline-block; width: 8px; height: 8px; background: var(--accent-green); border-radius: 50%; margin-right: 6px; box-shadow: 0 0 8px var(--accent-green); }
+
+        .grid-kpi { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 20px; }
+        .card { background: var(--panel-bg); border: 1px solid var(--panel-border); padding: 15px; border-radius: 4px; position: relative; }
+        .card::before { content: ''; position: absolute; top: 0; left: 0; width: 3px; height: 100%; background: var(--accent-cyan); }
+        .card-title { font-size: 10px; color: var(--text-muted); letter-spacing: 1px; display: flex; align-items: center; gap: 6px; }
+        .card-value { font-size: 22px; font-weight: bold; margin: 10px 0 4px 0; color: #fff; }
         .card-sub { font-size: 10px; color: var(--text-muted); }
+
+        .main-layout { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; margin-bottom: 20px; }
         
-        .chart-container { background: var(--panel-bg); border: 1px solid var(--border-color); border-radius: 6px; padding: 15px; margin-bottom: 25px; height: 250px; }
+        table { width: 100%; border-collapse: collapse; background: var(--panel-bg); border: 1px solid var(--panel-border); font-size: 11px; }
+        th, td { padding: 12px; text-align: left; border-bottom: 1px solid var(--panel-border); }
+        th { color: var(--text-muted); font-size: 10px; background: #121927; border-bottom: 1px solid var(--accent-cyan); }
         
-        table { width: 100%; border-collapse: collapse; background: var(--panel-bg); border: 1px solid var(--border-color); border-radius: 6px; margin-bottom: 25px; }
-        th, td { padding: 10px; text-align: left; border-bottom: 1px solid var(--border-color); font-size: 12px; }
-        th { color: var(--text-muted); text-transform: uppercase; font-size: 10px; background: #1c2128; }
+        .panel-box { background: var(--panel-bg); border: 1px solid var(--panel-border); padding: 15px; border-radius: 4px; }
+        .panel-title { color: #fff; font-size: 12px; font-weight: bold; margin-bottom: 15px; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid var(--panel-border); padding-bottom: 8px; }
+
+        .badge-status { background: #00ff881a; color: var(--accent-green); border: 1px solid var(--accent-green); padding: 2px 6px; font-size: 9px; border-radius: 2px; }
         
-        .section-title { color: var(--accent-blue); font-weight: bold; margin-bottom: 10px; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; }
-        .logs-container { background: var(--panel-bg); border: 1px solid var(--border-color); border-radius: 6px; padding: 15px; max-height: 250px; overflow-y: auto; font-size: 12px; }
-        .log-entry { border-bottom: 1px solid #21262d; padding: 6px 0; }
-        .log-time { color: var(--accent-blue); margin-right: 8px; }
+        .recommendation-box { border: 1px dashed var(--accent-cyan); background: #00f0ff0a; padding: 12px; border-radius: 4px; margin-bottom: 15px; }
+        .logs-container { max-height: 220px; overflow-y: auto; font-size: 10px; line-height: 1.6; }
+        .log-entry { border-bottom: 1px solid #141c2b; padding: 6px 0; }
+        .log-time { color: var(--accent-cyan); }
+        
+        .chart-container { height: 200px; margin-top: 15px; }
     </style>
 </head>
 <body>
 
     <div class="header">
-        <h1>G-SENTINEL // NEXUS (SWING TRADING)</h1>
-        <span id="last-update" style="color: var(--text-muted); font-size: 12px;">Cargando...</span>
+        <div class="header-title">
+            <span class="header-badge">G-SENTINEL 4</span>
+            <h1>NEXUS LONG // SWING TRADING ADAPTATIVE</h1>
+        </div>
+        <div style="font-size: 10px; color: var(--text-muted);">
+            <span class="status-dot"></span>CONEXIÓN G-CORE: ACTIVA | UPDATED: <span id="last-update">Cargando...</span>
+        </div>
     </div>
 
-    <!-- MÉTRICAS KPIS COMPLETAS RECUPERADAS -->
+    <!-- MÉTIRCAS ESTILO PATA 3 -->
     <div class="grid-kpi">
         <div class="card">
-            <div class="card-title">Estrategia</div>
-            <div class="card-value" style="color:var(--accent-green)">SWING TRADING</div>
-            <div class="card-sub">Core Adaptativo (LONG)</div>
-        </div>
-        <div class="card">
-            <div class="card-title">Capital Inicial</div>
-            <div class="card-value">$3300.00</div>
-            <div class="card-sub">Base de pruebas</div>
-        </div>
-        <div class="card">
-            <div class="card-title">Valor Cartera Actual</div>
+            <div class="card-title">VALOR CARTERA TRADING</div>
             <div class="card-value" id="capital-val">$3300.00</div>
             <div class="card-sub" id="pnl-neto">$0.00 (0.00%)</div>
         </div>
         <div class="card">
-            <div class="card-title">Slots Activos</div>
+            <div class="card-title">ESTRATEGIA Y FILTRO</div>
+            <div class="card-value" style="color:var(--accent-green)">EMA 200 + ATR</div>
+            <div class="card-sub">SWING LONG (4 SLOTS)</div>
+        </div>
+        <div class="card">
+            <div class="card-title">POSICIONES / FASE</div>
             <div class="card-value" id="slots-count">0 / 4</div>
-            <div class="card-sub">Posiciones abiertas</div>
+            <div class="card-sub" id="ops-progress">PROGRESO FASE: 0/100 OPS</div>
         </div>
         <div class="card">
-            <div class="card-title">Operaciones Cerradas</div>
-            <div class="card-value" id="ops-count" style="color:var(--accent-purple)">0 / 100</div>
-            <div class="card-sub" id="ops-progress">Progreso: 0% hacia producción</div>
-        </div>
-        <div class="card">
-            <div class="card-title">Win Rate (Acierto)</div>
-            <div class="card-value" id="win-rate" style="color:var(--accent-green)">0.0%</div>
-            <div class="card-sub">% ops ganadoras</div>
-        </div>
-        <div class="card">
-            <div class="card-title">Profit Factor</div>
-            <div class="card-value" id="profit-factor" style="color:var(--accent-blue)">0.00</div>
-            <div class="card-sub">Factor beneficio</div>
+            <div class="card-title">WIN RATE / PROFIT FACTOR</div>
+            <div class="card-value" style="color:var(--accent-cyan)"><span id="win-rate">0.0%</span> / <span id="profit-factor">0.00</span></div>
+            <div class="card-sub">RENDIMIENTO HISTÓRICO</div>
         </div>
     </div>
 
-    <!-- GRÁFICO CURVA DE CAPITAL -->
-    <div class="section-title">CURVA DE CRECIMIENTO DEL CAPITAL (BOLA DE NIEVE)</div>
-    <div class="chart-container">
-        <canvas id="equityChart"></canvas>
-    </div>
+    <div class="main-layout">
+        <!-- SECCIÓN IZQUIERDA: CARTERA Y GRÁFICO -->
+        <div>
+            <div class="panel-title">DESGLOSE DE POSICIONES ACTIVAS Y RIESGO ADAPTATIVO</div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>ACTIVO</th>
+                        <th>PRECIO ENTRADA</th>
+                        <th>PRECIO ACTUAL</th>
+                        <th>STOP LOSS (SL)</th>
+                        <th>TAKE PROFIT (TP)</th>
+                        <th>ESTADO RIESGO</th>
+                    </tr>
+                </thead>
+                <tbody id="pos-table">
+                    <tr><td colspan="6" style="text-align: center; color: var(--text-muted);">BUSCANDO OPORTUNIDADES EN EL MERCADO...</td></tr>
+                </tbody>
+            </table>
 
-    <!-- TABLA POSICIONES ACTIVAS -->
-    <div class="section-title">CARTERA ACTIVA MULTI-SLOT</div>
-    <table>
-        <thead>
-            <tr>
-                <th>Activo</th>
-                <th>Precio Entrada</th>
-                <th>Precio Actual</th>
-                <th>Stop Loss</th>
-                <th>Take Profit</th>
-                <th>Estado / Riesgo SL</th>
-            </tr>
-        </thead>
-        <tbody id="pos-table">
-            <tr><td colspan="6" style="text-align: center; color: var(--text-muted);">Buscando oportunidades en el mercado...</td></tr>
-        </tbody>
-    </table>
+            <div class="panel-box" style="margin-top: 20px;">
+                <div class="panel-title">CURVA DE CRECIMIENTO DEL CAPITAL (EQUITY)</div>
+                <div class="chart-container">
+                    <canvas id="equityChart"></canvas>
+                </div>
+            </div>
+        </div>
 
-    <!-- MATRIZ DE LOGS Y DECISIONES IA -->
-    <div class="section-title">MATRIZ DE RAZONAMIENTO Y DECISIONES IA</div>
-    <div class="logs-container" id="logs-list">
-        <div class="log-entry">Esperando sincronización de registros...</div>
+        <!-- SECCIÓN DERECHA: MOTOR DE ASESORÍA Y RAZONAMIENTO -->
+        <div>
+            <div class="panel-box" style="height: 100%;">
+                <div class="panel-title">MOTOR DE ASESORÍA CUANTITATIVA</div>
+                
+                <div class="recommendation-box">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                        <span style="font-size: 10px; color: var(--accent-cyan); font-weight: bold;">ESTADO GUARDIÁN IA</span>
+                        <span class="badge-status">EJECUTANDO</span>
+                    </div>
+                    <div style="font-size: 10px; color: var(--text-main);" id="guardian-status">
+                        EVALUANDO LIQUIDEZ Y EMA 200 EN TIEMPO REAL.
+                    </div>
+                </div>
+
+                <div class="panel-title" style="margin-top: 20px; font-size: 11px;">MATRIZ DE DECISIONES Y RAZONAMIENTO</div>
+                <div class="logs-container" id="logs-list">
+                    <div class="log-entry">INICIALIZANDO MONITOREO DE EVENTOS...</div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -120,7 +143,6 @@
         const CAPITAL_INICIAL = 3300.0;
 
         async function loadDashboard() {
-            // 1. Cargar Posiciones Activas
             try {
                 const res = await fetch('posiciones.json');
                 if (res.ok) {
@@ -136,57 +158,48 @@
                             const current = p.precio_actual || entry;
                             const sl = p.stop_loss ? `$${p.stop_loss}` : (p.sl_pct ? `-${p.sl_pct}%` : 'N/A');
                             const tp = p.take_profit ? `$${p.take_profit}` : (p.tp_pct ? `+${p.tp_pct}%` : 'N/A');
-                            const estado = p.estado_sl || 'Riesgo Adaptativo';
+                            const estado = p.estado_sl || 'RIESGO ADAPTATIVO';
 
                             return `<tr>
-                                <td><b>${k.toUpperCase()}</b></td>
+                                <td><b style="color:var(--accent-cyan)">${k.toUpperCase()}</b></td>
                                 <td>$${entry}</td>
-                                <td style="color:var(--accent-blue)">$${current}</td>
+                                <td style="color:var(--accent-green)">$${current}</td>
                                 <td style="color:var(--accent-red)">${sl}</td>
                                 <td style="color:var(--accent-green)">${tp}</td>
-                                <td>${estado}</td>
+                                <td><span class="badge-status">${estado}</span></td>
                             </tr>`;
                         }).join('');
                     } else {
-                        tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: var(--text-muted);">Sin posiciones abiertas actualmente.</td></tr>`;
+                        tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: var(--text-muted);">SIN POSICIONES ABIERTAS EN ESTE CICLO.</td></tr>`;
                     }
                 }
             } catch (e) { console.log("Error posiciones:", e); }
 
-            // 2. Cargar Historial, KPIs, Contador 100 Ops y Gráfico
             try {
                 const resH = await fetch('historial.json');
                 if (resH.ok) {
                     const historial = await resH.json();
                     if (historial.length > 0) {
                         const last = historial[historial.length - 1];
-                        document.getElementById('last-update').innerText = last.timestamp || last.fecha || 'Actualizado';
+                        document.getElementById('last-update').innerText = last.timestamp || last.fecha || 'ACTUALIZADO';
                         
                         const capitalActual = last.capital || CAPITAL_INICIAL;
                         document.getElementById('capital-val').innerText = `$${capitalActual.toFixed(2)}`;
                         
-                        // PnL Neto
                         const pnlVal = capitalActual - CAPITAL_INICIAL;
                         const pnlPct = (pnlVal / CAPITAL_INICIAL) * 100;
                         const pnlElement = document.getElementById('pnl-neto');
                         pnlElement.innerText = `${pnlVal >= 0 ? '+' : ''}$${pnlVal.toFixed(2)} (${pnlPct.toFixed(2)}%)`;
                         pnlElement.style.color = pnlVal >= 0 ? 'var(--accent-green)' : 'var(--accent-red)';
 
-                        // Contador de Operaciones Cerradas (Filtro por ventas ejecutadas)
                         const opsCerradas = historial.filter(h => {
                             const acc = (h.accion || h.result || '').toUpperCase();
                             return acc.includes('STOP_LOSS') || acc.includes('TAKE_PROFIT') || acc.includes('VENTA');
                         }).length;
 
-                        document.getElementById('ops-count').innerText = `${opsCerradas} / 100`;
-                        const progresoPct = ((opsCerradas / 100) * 100).toFixed(1);
-                        document.getElementById('ops-progress').innerText = `Progreso: ${progresoPct}% hacia Fase Definitiva`;
+                        document.getElementById('ops-progress').innerText = `PROGRESO FASE: ${opsCerradas}/100 OPS`;
 
-                        // Calcular Win Rate y Profit Factor si hay operaciones cerradas
-                        let ganadoras = 0;
-                        let gananciasUSD = 0;
-                        let perdidasUSD = 0;
-
+                        let ganadoras = 0, gananciasUSD = 0, perdidasUSD = 0;
                         historial.forEach(h => {
                             const acc = (h.accion || h.result || '').toUpperCase();
                             if (acc.includes('TAKE_PROFIT') || (h.pnl_usd && h.pnl_usd > 0)) {
@@ -198,14 +211,10 @@
                         });
 
                         if (opsCerradas > 0) {
-                            const winRateVal = ((ganadoras / opsCerradas) * 100).toFixed(1);
-                            document.getElementById('win-rate').innerText = `${winRateVal}%`;
-                            
-                            const pfVal = perdidasUSD > 0 ? (gananciasUSD / perdidasUSD).toFixed(2) : (gananciasUSD > 0 ? 'INF' : '0.00');
-                            document.getElementById('profit-factor').innerText = pfVal;
+                            document.getElementById('win-rate').innerText = `${((ganadoras / opsCerradas) * 100).toFixed(1)}%`;
+                            document.getElementById('profit-factor').innerText = perdidasUSD > 0 ? (gananciasUSD / perdidasUSD).toFixed(2) : (gananciasUSD > 0 ? 'INF' : '0.00');
                         }
 
-                        // Renderizar Logs en la Matriz
                         const logsDiv = document.getElementById('logs-list');
                         logsDiv.innerHTML = historial.slice().reverse().map(h => {
                             const time = h.timestamp || h.fecha || '';
@@ -213,7 +222,10 @@
                             return `<div class="log-entry"><span class="log-time">[${time}]</span> ${text}</div>`;
                         }).join('');
 
-                        // Construir Gráfico
+                        if (historial.length > 0) {
+                            document.getElementById('guardian-status').innerText = historial[historial.length - 1].razonamiento || "GUARDIÁN ADAPTATIVO ACTIVO EN SEGUNGOPLANO.";
+                        }
+
                         const labels = historial.map(h => h.timestamp || h.fecha || '');
                         const capitalData = historial.map(h => h.capital || CAPITAL_INICIAL);
 
@@ -224,12 +236,13 @@
                             data: {
                                 labels: labels,
                                 datasets: [{
-                                    label: 'Capital ($)',
+                                    label: 'CAPITAL ($)',
                                     data: capitalData,
-                                    borderColor: '#3fb950',
-                                    backgroundColor: 'rgba(63, 185, 80, 0.1)',
+                                    borderColor: '#00f0ff',
+                                    backgroundColor: 'rgba(0, 240, 255, 0.05)',
                                     fill: true,
-                                    tension: 0.2
+                                    tension: 0.1,
+                                    borderWidth: 1.5
                                 }]
                             },
                             options: {
@@ -237,8 +250,8 @@
                                 maintainAspectRatio: false,
                                 plugins: { legend: { display: false } },
                                 scales: {
-                                    x: { ticks: { color: '#8b949e', font: { size: 9 } } },
-                                    y: { ticks: { color: '#8b949e' } }
+                                    x: { ticks: { color: '#6e7681', font: { size: 8 } }, grid: { color: '#1a2333' } },
+                                    y: { ticks: { color: '#6e7681', font: { size: 8 } }, grid: { color: '#1a2333' } }
                                 }
                             }
                         });
