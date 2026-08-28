@@ -1,0 +1,28 @@
+name: G-SENTINEL NEXUS SHORT Engine
+
+on:
+  schedule:
+    - cron: '0 * * * *'  # Ejecución cada hora
+  workflow_dispatch:
+
+jobs:
+  run-nexus-short:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Código
+        uses: actions/checkout@v4
+
+      - name: Configurar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Ejecutar Motor Cripto SHORT
+        run: python main.py
+
+      - name: Commit y Push de Posiciones JSON
+        run: |
+          git config --global user.name "G-SENTINEL-BOT"
+          git config --global user.email "bot@g-sentinel.local"
+          git add posiciones.json historial.json
+          git diff --quiet && git diff --staged --quiet || (git commit -m "update: Pata NEXUS SHORT - Posiciones JSON [skip ci]" && git push)
