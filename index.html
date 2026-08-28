@@ -3,393 +3,92 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Agente Trading Cripto - Audit Dashboard</title>
-    <!-- Chart.js para la gráfica de capital -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <title>G-SENTINEL // NEXUS SHORT</title>
     <style>
         :root {
-            --bg-color: #0f172a;
-            --card-bg: #1e293b;
-            --text-primary: #f8fafc;
-            --text-secondary: #94a3b8;
-            --accent-green: #10b981;
-            --accent-red: #ef4444;
-            --accent-blue: #3b82f6;
-            --accent-purple: #8b5cf6;
-            --border-color: #334155;
+            --bg-color: #0b0f19;
+            --panel-bg: #161b22;
+            --border-color: #30363d;
+            --accent-red: #f85149;
+            --accent-green: #3fb950;
+            --accent-blue: #00f0ff;
+            --text-main: #c9d1d9;
+            --text-muted: #8b949e;
         }
-
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-primary);
-            margin: 0;
-            padding: 20px;
-        }
-
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-        }
-
-        .header {
-            background-color: var(--card-bg);
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            padding: 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .header h1 {
-            margin: 0;
-            font-size: 1.5rem;
-            color: var(--accent-green);
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .status-badge {
-            background-color: rgba(16, 185, 129, 0.1);
-            color: var(--accent-green);
-            padding: 6px 12px;
-            border-radius: 20px;
-            font-size: 0.85rem;
-            border: 1px solid var(--accent-green);
-        }
-
-        .grid-kpi {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
-        }
-
-        .card {
-            background-color: var(--card-bg);
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            padding: 20px;
-        }
-
-        .kpi-title {
-            font-size: 0.75rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            color: var(--text-secondary);
-            margin-bottom: 8px;
-        }
-
-        .kpi-value {
-            font-size: 1.6rem;
-            font-weight: bold;
-        }
-
-        .kpi-subtext {
-            font-size: 0.8rem;
-            color: var(--text-secondary);
-            margin-top: 5px;
-        }
-
-        .text-green { color: var(--accent-green); }
-        .text-red { color: var(--accent-red); }
-        .text-purple { color: var(--accent-purple); }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 10px;
-        }
-
-        th, td {
-            text-align: left;
-            padding: 12px;
-            border-bottom: 1px solid var(--border-color);
-            font-size: 0.9rem;
-        }
-
-        th {
-            color: var(--text-secondary);
-            font-weight: 600;
-            text-transform: uppercase;
-            font-size: 0.75rem;
-        }
-
-        .matrix-log {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            max-height: 350px;
-            overflow-y: auto;
-        }
-
-        .log-item {
-            background-color: rgba(15, 23, 42, 0.6);
-            border-left: 4px solid var(--accent-blue);
-            padding: 12px;
-            border-radius: 4px;
-            font-size: 0.85rem;
-        }
-
-        .log-header {
-            display: flex;
-            justify-content: space-between;
-            color: var(--text-secondary);
-            font-size: 0.75rem;
-            margin-bottom: 5px;
-        }
-
-        .log-badge {
-            background-color: var(--border-color);
-            padding: 2px 6px;
-            border-radius: 4px;
-            font-weight: bold;
-        }
+        body { background-color: var(--bg-color); color: var(--text-main); font-family: monospace; margin: 0; padding: 20px; }
+        .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--accent-red); padding-bottom: 10px; margin-bottom: 20px; }
+        .header h1 { margin: 0; font-size: 20px; color: var(--accent-red); letter-spacing: 1px; }
+        .grid-kpi { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 25px; }
+        .card { background: var(--panel-bg); border: 1px solid var(--border-color); border-radius: 6px; padding: 15px; }
+        .card-title { font-size: 11px; color: var(--text-muted); text-transform: uppercase; }
+        .card-value { font-size: 22px; font-weight: bold; margin: 8px 0; color: #fff; }
+        table { width: 100%; border-collapse: collapse; background: var(--panel-bg); border: 1px solid var(--border-color); border-radius: 6px; margin-bottom: 20px; }
+        th, td { padding: 10px; text-align: left; border-bottom: 1px solid var(--border-color); font-size: 12px; }
+        th { color: var(--text-muted); text-transform: uppercase; font-size: 10px; background: #1c2128; }
     </style>
 </head>
 <body>
-
-<div class="container">
-    <!-- Header principal -->
     <div class="header">
-        <div>
-            <h1>🤖 Agente Trading Cripto</h1>
-            <div class="kpi-subtext">Coinbase Advanced Live Audit Dashboard (Fondo €3,000 / $3,300 USD)</div>
-        </div>
-        <div>
-            <span class="status-badge">● Sistema Activo</span>
-            <div class="kpi-subtext" id="last-update" style="text-align: right; margin-top: 5px;">Última ejec: --</div>
-        </div>
+        <h1>G-SENTINEL // NEXUS SHORT (PATA 4)</h1>
+        <span id="last-update" style="color: var(--text-muted); font-size: 12px;">Cargando...</span>
     </div>
 
-    <!-- Gráfica de Capital -->
-    <div class="card">
-        <div class="kpi-title">📈 Curva de Crecimiento del Capital (Bola de Nieve)</div>
-        <canvas id="capitalChart" height="80"></canvas>
-    </div>
-
-    <!-- Metricas de Balance principal + Contador de Trades -->
     <div class="grid-kpi">
         <div class="card">
-            <div class="kpi-title">Capital Inicial</div>
-            <div class="kpi-value" id="cap-inicial">$3300.00</div>
+            <div class="card-title">Estrategia</div>
+            <div class="card-value" style="color:var(--accent-red)">BEARISH SHORT</div>
         </div>
         <div class="card">
-            <div class="kpi-title">Valor Cartera Actual</div>
-            <div class="kpi-value" id="cap-actual">$3300.00</div>
+            <div class="card-title">Slots Activos</div>
+            <div class="card-value" id="slots-count">0 / 4</div>
         </div>
         <div class="card">
-            <div class="kpi-title">Profit / Loss Neto</div>
-            <div class="kpi-value" id="pnl-neto">+$0.00 (0.00%)</div>
-        </div>
-        <div class="card">
-            <div class="kpi-title">Posiciones Abiertas</div>
-            <div class="kpi-value" id="pos-abiertas">0 / 4</div>
-        </div>
-        <!-- KPI: Contador de Operaciones -->
-        <div class="card">
-            <div class="kpi-title">Operaciones Cerradas</div>
-            <div class="kpi-value text-purple" id="total-trades">0 / 100</div>
-            <div class="kpi-subtext" id="trades-progress">Progreso: 0% para calibración</div>
+            <div class="card-title">Filtro Tendencial</div>
+            <div class="card-value" style="color:var(--accent-blue)">Precio < EMA 200</div>
         </div>
     </div>
 
-    <!-- Salud Cuantitativa -->
-    <div class="card">
-        <div class="kpi-title">🧪 Salud Cuantitativa y Eficiencia (KPIs)</div>
-        <div class="grid-kpi" style="margin-top: 10px;">
-            <div>
-                <div class="kpi-subtext">TASA DE ACIERTO (WIN RATE)</div>
-                <div class="kpi-value text-green" id="win-rate">0.0%</div>
-                <div class="kpi-subtext">% de operaciones en ganancia</div>
-            </div>
-            <div>
-                <div class="kpi-subtext">FACTOR DE BENEFICIO (PROFIT FACTOR)</div>
-                <div class="kpi-value" id="profit-factor">0.00</div>
-                <div class="kpi-subtext">Dólares ganados / perdedores</div>
-            </div>
-            <div>
-                <div class="kpi-subtext">MÁXIMO DESPLOME (MAX DRAWDOWN)</div>
-                <div class="kpi-value text-red" id="max-drawdown">0.00%</div>
-                <div class="kpi-subtext">Riesgo de caída histórico</div>
-            </div>
-        </div>
-    </div>
+    <div style="color: var(--accent-red); font-weight: bold; margin-bottom: 10px;">MATRIZ DE POSICIONES CORTAS ACTIVAS</div>
+    <table>
+        <thead>
+            <tr>
+                <th>Activo</th>
+                <th>Precio Entrada</th>
+                <th>Stop Loss (SL %)</th>
+                <th>Take Profit (TP %)</th>
+                <th>Timestamp Entrada</th>
+            </tr>
+        </thead>
+        <tbody id="pos-table">
+            <tr><td colspan="5" style="text-align: center; color: var(--text-muted);">Buscando señales cortas en el mercado...</td></tr>
+        </tbody>
+    </table>
 
-    <!-- Cartera Activa con Columna de Precio Actual -->
-    <div class="card">
-        <div class="kpi-title">💼 Cartera Activa Multi-Slot</div>
-        <table>
-            <thead>
-                <tr>
-                    <th>Ticker</th>
-                    <th>Precio Entrada</th>
-                    <th>Precio Actual</th>
-                    <th>Monto USD</th>
-                    <th>Stop Loss</th>
-                    <th>Take Profit</th>
-                    <th>Estado SL</th>
-                </tr>
-            </thead>
-            <tbody id="tabla-posiciones">
-                <tr><td colspan="7" style="text-align: center;">Cargando posiciones...</td></tr>
-            </tbody>
-        </table>
-    </div>
-
-    <!-- Matriz de Decisiones de IA -->
-    <div class="card">
-        <div class="kpi-title">🧠 Matriz de Razonamiento y Decisiones IA</div>
-        <div class="matrix-log" id="log-decisiones">
-            <div class="log-item">Cargando historial de ejecuciones...</div>
-        </div>
-    </div>
-</div>
-
-<script>
-    let capitalChart = null;
-
-    // Precios de referencia del mercado para cálculo de PnL flotante
-    const preciosMercado = {
-        "BTC": 77450.00,
-        "ETH": 2450.00,
-        "SOL": 94.10,
-        "XRP": 1.4708,
-        "DOGE": 0.1250
-    };
-
-    async function cargarDashboard() {
-        try {
-            const resHistorial = await fetch('historial.json?v=' + new Date().getTime());
-            const historial = await resHistorial.json();
-
-            const resPosiciones = await fetch('posiciones.json?v=' + new Date().getTime());
-            const posiciones = await resPosiciones.json();
-
-            actualizarMetricasYTabla(historial, posiciones);
-            actualizarGrafico(historial);
-            actualizarContadorTrades(historial);
-        } catch (e) {
-            console.error("Error cargando los archivos JSON:", e);
-        }
-    }
-
-    function actualizarContadorTrades(historialData) {
-        const tradesCerrados = historialData.filter(item => 
-            item.accion && (
-                item.accion.includes('STOP_LOSS') || 
-                item.accion.includes('TAKE_PROFIT') || 
-                item.accion.includes('VENTA')
-            )
-        ).length;
-
-        const meta = 100;
-        const porcentaje = Math.min(((tradesCerrados / meta) * 100), 100).toFixed(1);
-
-        document.getElementById('total-trades').innerText = `${tradesCerrados} / ${meta}`;
-        document.getElementById('trades-progress').innerText = `Progreso: ${porcentaje}% hacia Fase Adaptativa`;
-    }
-
-    function actualizarMetricasYTabla(historial, posiciones) {
-        if (!historial || historial.length === 0) return;
-
-        const ultimoRegistro = historial[historial.length - 1];
-        
-        document.getElementById('last-update').innerText = `Última ejec: ${ultimoRegistro.timestamp || '--'}`;
-        document.getElementById('cap-actual').innerText = `$${(ultimoRegistro.capital || 3300).toFixed(2)}`;
-        
-        const pnl = (ultimoRegistro.capital || 3300) - 3300;
-        const pnlPct = (pnl / 3300) * 100;
-        const pnlElem = document.getElementById('pnl-neto');
-        pnlElem.innerText = `${pnl >= 0 ? '+' : ''}$${pnl.toFixed(2)} (${pnlPct.toFixed(2)}%)`;
-        pnlElem.className = `kpi-value ${pnl >= 0 ? 'text-green' : 'text-red'}`;
-
-        const totalPos = Object.keys(posiciones).length;
-        document.getElementById('pos-abiertas').innerText = `${totalPos} / 4`;
-
-        const tbody = document.getElementById('tabla-posiciones');
-        tbody.innerHTML = '';
-
-        if (totalPos === 0) {
-            tbody.innerHTML = '<tr><td colspan="7" style="text-align: center;">Sin posiciones abiertas. 100% Liquidez en USD.</td></tr>';
-        } else {
-            for (const [ticker, pos] of Object.entries(posiciones)) {
-                const precioEntrada = pos.precio_entrada || 0;
-                const precioActual = pos.precio_actual || preciosMercado[ticker] || precioEntrada;
+    <script>
+        async function loadData() {
+            try {
+                const res = await fetch('posiciones.json');
+                const data = await res.json();
                 
-                const pnlFlotantePct = precioEntrada > 0 ? ((precioActual - precioEntrada) / precioEntrada) * 100 : 0;
-                const colorPnl = pnlFlotantePct >= 0 ? 'var(--accent-green)' : 'var(--accent-red)';
+                const keys = Object.keys(data);
+                document.getElementById('slots-count').innerText = keys.length + ' / 4';
 
-                const tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td class="text-green" style="font-weight: bold;">${ticker}</td>
-                    <td>$${precioEntrada}</td>
-                    <td style="color: ${colorPnl}; font-weight: bold;">$${precioActual} (${pnlFlotantePct >= 0 ? '+' : ''}${pnlFlotantePct.toFixed(2)}%)</td>
-                    <td>$${(pos.monto_usd || 0).toFixed(2)}</td>
-                    <td class="text-red">$${pos.stop_loss}</td>
-                    <td class="text-green">$${pos.take_profit}</td>
-                    <td><span class="log-badge">${pos.estado_sl || 'Riesgo Inicial'}</span></td>
-                `;
-                tbody.appendChild(tr);
-            }
-        }
-
-        const logContainer = document.getElementById('log-decisiones');
-        logContainer.innerHTML = '';
-        
-        const ultimosLogs = [...historial].reverse().slice(0, 15);
-        ultimosLogs.forEach(log => {
-            const item = document.createElement('div');
-            item.className = 'log-item';
-            item.innerHTML = `
-                <div class="log-header">
-                    <span>${log.timestamp}</span>
-                    <span class="log-badge">${log.accion || 'MANTENER'}</span>
-                </div>
-                <div>${log.razonamiento || 'Sin registros de razonamiento.'}</div>
-            `;
-            logContainer.appendChild(item);
-        });
-    }
-
-    function actualizarGrafico(historial) {
-        const labels = historial.map(h => h.timestamp ? h.timestamp.split(', ')[1] || h.timestamp : '');
-        const dataCapital = historial.map(h => h.capital || 3300);
-
-        const ctx = document.getElementById('capitalChart').getContext('2d');
-
-        if (capitalChart) capitalChart.destroy();
-
-        capitalChart = new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: labels,
-                datasets: [{
-                    label: 'Capital Total (USD)',
-                    data: dataCapital,
-                    borderColor: '#10b981',
-                    backgroundColor: 'rgba(16, 185, 129, 0.1)',
-                    fill: true,
-                    tension: 0.2,
-                    pointRadius: 3
-                }]
-            },
-            options: {
-                responsive: true,
-                plugins: { legend: { display: false } },
-                scales: {
-                    x: { ticks: { color: '#94a3b8' }, grid: { color: '#334155' } },
-                    y: { ticks: { color: '#94a3b8' }, grid: { color: '#334155' } }
+                const tbody = document.getElementById('pos-table');
+                if (keys.length > 0) {
+                    tbody.innerHTML = keys.map(k => {
+                        const p = data[k];
+                        return `<tr>
+                            <td><b>${k.toUpperCase()}</b></td>
+                            <td>$${p.entry_price}</td>
+                            <td style="color:var(--accent-red)">-${p.sl_pct}%</td>
+                            <td style="color:var(--accent-green)">+${p.tp_pct}%</td>
+                            <td>${p.timestamp}</td>
+                        </tr>`;
+                    }).join('');
                 }
-            }
-        });
-    }
-
-    window.onload = cargarDashboard;
-</script>
+            } catch (e) { console.log("Sin posiciones activas."); }
+        }
+        loadData();
+    </script>
 </body>
 </html>
