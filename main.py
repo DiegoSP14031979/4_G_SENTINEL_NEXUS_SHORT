@@ -1,140 +1,148 @@
-import os
+import urllib.request
 import json
-import requests
-import numpy as np
+import os
 from datetime import datetime
 
-# ==========================================
-# CONFIGURACIÓN CORE VALIDADA EN BACKTEST
-# ==========================================
-CAPITAL_INICIAL = 3300.0
-SLOTS_MAXIMOS = 4
-TICKERS_PRINCIPALES = ["BTC", "ETH", "SOL", "XRP", "DOGE"]
+UNIVERSO = ["bitcoin", "ethereum", "solana", "ripple", "dogecoin"]
+MAPA_SIMBOLOS = {"bitcoin": "BTC", "ethereum": "ETH", "solana": "SOL", "ripple": "XRP", "dogecoin": "DOGE"}
 
-POSICIONES_FILE = "posiciones.json"
-HISTORIAL_FILE = "historial.json"
+CAPITAL_SLOT = 825.0  # $825 USD por posición (4 slots dinámicos)
+RISK_REWARD_RATIO = 2.2
 
-MAPA_GECKO = {
-    "BTC": "bitcoin", "ETH": "ethereum", "SOL": "solana",
-    "XRP": "ripple", "DOGE": "dogecoin"
-}
+HEADERS = {'User-Agent': 'Mozilla/5.0'}
 
-def cargar_json(filepath, default):
-    if not os.path.exists(filepath):
-        return default
+def get_market_data(coin_id):
+    """Obtiene velas de 1h de CoinGecko para calcular EMA 200 y ATR 14"""
     try:
-        with open(filepath, "r", encoding="utf-8") as f:
-            return json.load(f)
-    except Exception:
-        return default
-
-def guardar_json(filepath, data):
-    with open(filepath, "w", encoding="utf-8") as f:
-        json.dump(data, f, indent=4, ensure_ascii=False)
-
-def obtener_historico_hora(ticker):
-    coin_id = MAPA_GECKO.get(ticker, ticker.lower())
-    url = f"https://api.coingecko.com/api/v3/coins/{coin_id}/market_chart?vs_currency=usd&days=90"
-    try:
-        res = requests.get(url, timeout=12)
-        if res.status_code == 200:
-            return [p[1] for p in res.json()["prices"]]
-    except Exception as e:
-        print(f"⚠️ Error al obtener datos para {ticker}: {e}")
-    return []
-
-def ejecutar_agente():
-    timestamp = datetime.now().strftime("%d/%m/%Y, %H:%M:%S")
-    posiciones = cargar_json(POSICIONES_FILE, {})
-    historial = cargar_json(HISTORIAL_FILE, [])
-
-    capital_actual = historial[-1].get("capital", CAPITAL_INICIAL) if historial else CAPITAL_INICIAL
-    monto_slot = capital_actual / SLOTS_MAXIMOS
-
-    print(f"🤖 Ejecutando Agente Cripto (Core Backtest Validado) - {timestamp}")
-
-    # 1. EVALUAR POSICIONES ABIERTAS
-    tickers_eliminar = []
-    accion_tomada = "MANTENER"
-    razonamiento = f"Cartera con {len(posiciones)}/{SLOTS_MAXIMOS} slots ocupados. Guardián adaptativo activo."
-
-    for ticker, pos in posiciones.items():
-        precios = obtener_historico_hora(ticker)
-        if not precios:
-            continue
-            
-        precio_actual = precios[-1]
-        pos["precio_actual"] = round(precio_actual, 4)
-
-        if precio_actual <= pos["stop_loss"]:
-            pnl_usd = pos["monto_usd"] * (precio_actual - pos["precio_entrada"]) / pos["precio_entrada"]
-            capital_actual += pnl_usd
-            accion_tomada = "EJECUTAR_STOP_LOSS"
-            razonamiento = f"VENTA SL ({ticker}): Salida adaptativa ejecutada a ${precio_actual:.4f}."
-            tickers_eliminar.append(ticker)
-            
-        elif precio_actual >= pos["take_profit"]:
-            pnl_usd = pos["monto_usd"] * (precio_actual - pos["precio_entrada"]) / pos["precio_entrada"]
-            capital_actual += pnl_usd
-            accion_tomada = "EJECUTAR_TAKE_PROFIT"
-            razonamiento = f"VENTA TP ({ticker}): Objetivo alcanzado a ${precio_actual:.4f}."
-            tickers_eliminar.append(ticker)
-
-    for t in tickers_eliminar:
-        del posiciones[t]
-
-    # 2. EVALUAR NUEVAS ENTRADAS CON LÓGICA EXACTA DE BACKTEST
-    if len(posiciones) < SLOTS_MAXIMOS:
-        for ticker in TICKERS_PRINCIPALES:
-            if ticker in posiciones:
-                continue
+        url = f"https://api.coingecko.com/api/v3/coins/{coin_id}/market_chart?vs_currency=usd&days=14"
+        req = urllib.request.Request(url, headers=HEADERS)
+        with urllib.request.urlopen(req, timeout=10) as response:
+            data = json.loads(response.read().decode('utf-8'))
+            prices = [p[1] for p in data.get("prices", [])]
+            if len(prices) >= 200:
+                price_current = prices[-1]
+                ema_200 = sum(prices[-200:]) / 200
                 
-            precios = obtener_historico_hora(ticker)
-            if len(precios) < 200:
-                continue
-
-            precio_actual = precios[-1]
-            precios_slice = precios[-200:]
-            
-            # Filtro Tendencial: EMA 200
-            ema_200 = float(np.mean(precios_slice))
-            regimen_bull = precio_actual > ema_200
-            
-            # Impulso inmediato
-            impulso = (precio_actual - precios[-2]) / precios[-2]
-            
-            # ATR (14 periodos)
-            p_slice = precios[-15:]
-            retornos = np.abs(np.diff(p_slice) / p_slice[:-1])
-            atr_pct = float(np.mean(retornos))
-            
-            sl_pct = max(0.025, min(0.05, atr_pct * 1.5))
-            tp_pct = sl_pct * 2.2  # Ratio Riesgo/Beneficio 1:2.2
-
-            if regimen_bull and impulso > 0.008:
-                posiciones[ticker] = {
-                    "precio_entrada": round(precio_actual, 4),
-                    "precio_actual": round(precio_actual, 4),
-                    "monto_usd": round(monto_slot, 2),
-                    "stop_loss": round(precio_actual * (1 - sl_pct), 4),
-                    "take_profit": round(precio_actual * (1 + tp_pct), 4),
-                    "estado_sl": f"ATR ({sl_pct*100:.1f}%)"
+                # Impulso de la última vela horaria
+                impulse_pct = ((price_current - prices[-2]) / prices[-2]) * 100
+                
+                # ATR aproximado
+                diffs = [abs(prices[i] - prices[i-1]) for i in range(1, len(prices))]
+                atr_14 = sum(diffs[-14:]) / 14
+                atr_pct = (atr_14 / price_current) * 100
+                
+                return {
+                    "price": price_current,
+                    "ema_200": ema_200,
+                    "impulse_pct": impulse_pct,
+                    "atr_pct": atr_pct
                 }
-                accion_tomada = f"COMPRA_{ticker}"
-                razonamiento = f"ENTRADA EN {ticker}: Confirmada tendencia alcista > EMA 200 e impulso de +{impulso*100:.2f}%. SL a -{sl_pct*100:.1f}% | TP a +{tp_pct*100:.1f}%."
+    except Exception as e:
+        print(f"[ERROR API {coin_id}]: {e}")
+    return None
+
+def main():
+    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    print(f"[{timestamp}] Ejecutando G-SENTINEL NEXUS SHORT Engine...")
+
+    # Cargar Posiciones
+    posiciones = {}
+    if os.path.exists("posiciones.json"):
+        try:
+            with open("posiciones.json", "r") as f:
+                posiciones = json.load(f)
+        except Exception:
+            posiciones = {}
+
+    historial = []
+    if os.path.exists("historial.json"):
+        try:
+            with open("historial.json", "r") as f:
+                historial = json.load(f)
+        except Exception:
+            historial = []
+
+    logs = []
+
+    # 1. Evaluar SL/TP de Posiciones Cortas Activas
+    activos_a_cerrar = []
+    for coin, pos in posiciones.items():
+        data = get_market_data(coin)
+        if not data:
+            continue
+
+        price = data["price"]
+        entry = pos["entry_price"]
+        sl_pct = pos["sl_pct"]
+        tp_pct = pos["tp_pct"]
+
+        # En SHORT: Ganamos si el precio baja, perdemos si sube
+        pnl_pct = ((entry - price) / entry) * 100
+
+        if pnl_pct >= tp_pct:
+            # Take Profit alcanzado
+            pnl_usd = round(CAPITAL_SLOT * (tp_pct / 100), 2)
+            historial.append({
+                "fecha": timestamp,
+                "asset": MAPA_SIMBOLOS.get(coin, coin),
+                "type": "SHORT",
+                "result": "TAKE_PROFIT",
+                "pnl_usd": pnl_usd,
+                "pnl_pct": tp_pct
+            })
+            activos_a_cerrar.append(coin)
+            logs.append(f"[TP CERRADO] {MAPA_SIMBOLOS[coin]} SHORT +{tp_pct:.2f}% (${pnl_usd})")
+
+        elif pnl_pct <= -sl_pct:
+            # Stop Loss alcanzado
+            pnl_usd = round(-CAPITAL_SLOT * (sl_pct / 100), 2)
+            historial.append({
+                "fecha": timestamp,
+                "asset": MAPA_SIMBOLOS.get(coin, coin),
+                "type": "SHORT",
+                "result": "STOP_LOSS",
+                "pnl_usd": pnl_usd,
+                "pnl_pct": -sl_pct
+            })
+            activos_a_cerrar.append(coin)
+            logs.append(f"[SL CERRADO] {MAPA_SIMBOLOS[coin]} SHORT -{sl_pct:.2f}% (${pnl_usd})")
+
+    for c in activos_a_cerrar:
+        del posiciones[c]
+
+    # 2. Evaluar Nuevas Entradas SHORT si hay slots libres (< 4)
+    if len(posiciones) < 4:
+        for coin in UNIVERSO:
+            if coin in posiciones:
+                continue
+            if len(posiciones) >= 4:
                 break
 
-    # 3. ALMACENAMIENTO DE DATOS
-    guardar_json(POSICIONES_FILE, posiciones)
-    
-    log_entry = {
-        "timestamp": timestamp,
-        "capital": round(capital_actual, 2),
-        "accion": accion_tomada,
-        "razonamiento": razonamiento
-    }
-    historial.append(log_entry)
-    guardar_json(HISTORIAL_FILE, historial)
+            data = get_market_data(coin)
+            if not data:
+                continue
+
+            # Reglas SHORT: Precio < EMA 200 AND Impulso < -0.8%
+            if data["price"] < data["ema_200"] and data["impulse_pct"] < -0.8:
+                sl_dynamic = max(2.5, min(5.0, data["atr_pct"] * 1.5))
+                tp_dynamic = sl_dynamic * RISK_REWARD_RATIO
+
+                posiciones[coin] = {
+                    "entry_price": data["price"],
+                    "sl_pct": round(sl_dynamic, 2),
+                    "tp_pct": round(tp_dynamic, 2),
+                    "timestamp": timestamp
+                }
+                logs.append(f"[SHORT ENTRADA] {MAPA_SIMBOLOS[coin]} a ${data['price']} | SL: {sl_dynamic:.2f}% | TP: {tp_dynamic:.2f}%")
+
+    # Guardar JSONs
+    with open("posiciones.json", "w") as f:
+        json.dump(posiciones, f, indent=4)
+
+    with open("historial.json", "w") as f:
+        json.dump(historial, f, indent=4)
+
+    print(" -> Engine SHORT ejecutado correctamente.")
 
 if __name__ == "__main__":
-    ejecutar_agente()
+    main()
