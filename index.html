@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>G-SENTINEL 4 // NEXUS TRADING SWING</title>
+    <title>G-SENTINEL 4 // NEXUS CRYPTO SHORT</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
@@ -25,8 +25,7 @@
         .header h1 { margin: 0; font-size: 18px; color: #fff; letter-spacing: 1.5px; }
         .status-dot { display: inline-block; width: 8px; height: 8px; background: var(--accent-green); border-radius: 50%; margin-right: 6px; box-shadow: 0 0 8px var(--accent-green); }
 
-        /* TODAS LAS KPIS RECUPERADAS EN 7 COLUMNAS ESTILO PATA 3 */
-        .grid-kpi { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-bottom: 20px; }
+        .grid-kpi { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin-bottom: 20px; }
         .card { background: var(--panel-bg); border: 1px solid var(--panel-border); padding: 12px; border-radius: 4px; position: relative; }
         .card::before { content: ''; position: absolute; top: 0; left: 0; width: 3px; height: 100%; background: var(--accent-cyan); }
         .card-title { font-size: 9px; color: var(--text-muted); letter-spacing: 0.5px; }
@@ -42,7 +41,7 @@
         .panel-box { background: var(--panel-bg); border: 1px solid var(--panel-border); padding: 15px; border-radius: 4px; }
         .panel-title { color: #fff; font-size: 11px; font-weight: bold; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid var(--panel-border); padding-bottom: 6px; letter-spacing: 0.5px; }
 
-        .badge-status { background: #00ff881a; color: var(--accent-green); border: 1px solid var(--accent-green); padding: 2px 6px; font-size: 9px; border-radius: 2px; }
+        .badge-status { background: #ff33661a; color: var(--accent-red); border: 1px solid var(--accent-red); padding: 2px 6px; font-size: 9px; border-radius: 2px; }
         
         .recommendation-box { border: 1px dashed var(--accent-cyan); background: #00f0ff0a; padding: 12px; border-radius: 4px; margin-bottom: 15px; }
         .logs-container { max-height: 240px; overflow-y: auto; font-size: 10px; line-height: 1.6; }
@@ -57,19 +56,18 @@
     <div class="header">
         <div class="header-title">
             <span class="header-badge">G-SENTINEL 4</span>
-            <h1>NEXUS LONG // SWING TRADING ADAPTATIVE</h1>
+            <h1>NEXUS SHORT // CRYPTO SWING ENGINE</h1>
         </div>
         <div style="font-size: 10px; color: var(--text-muted);">
             <span class="status-dot"></span>CONEXIÓN G-CORE: ACTIVA | UPDATED: <span id="last-update">Cargando...</span>
         </div>
     </div>
 
-    <!-- MÉTIRCAS KPIS COMPLETAS EN GRID TIPO PATA 3 -->
     <div class="grid-kpi">
         <div class="card">
             <div class="card-title">ESTRATEGIA</div>
-            <div class="card-value" style="color:var(--accent-green)">SWING TRADING</div>
-            <div class="card-sub">Core Adaptativo (LONG)</div>
+            <div class="card-value" style="color:var(--accent-red)">SHORT CRYPTO</div>
+            <div class="card-sub" id="macro-status">Core Adaptativo (SHORT)</div>
         </div>
         <div class="card">
             <div class="card-title">CAPITAL INICIAL</div>
@@ -84,7 +82,7 @@
         <div class="card">
             <div class="card-title">SLOTS ACTIVOS</div>
             <div class="card-value" id="slots-count">0 / 4</div>
-            <div class="card-sub">Posiciones abiertas</div>
+            <div class="card-sub">Posiciones Cortas</div>
         </div>
         <div class="card">
             <div class="card-title">OPERACIONES CERRADAS</div>
@@ -104,9 +102,8 @@
     </div>
 
     <div class="main-layout">
-        <!-- IZQUIERDA: POSICIONES ACTIVAS Y GRÁFICO -->
         <div>
-            <div class="panel-title">CARTERA ACTIVA MULTI-SLOT Y RIESGO ADAPTATIVO</div>
+            <div class="panel-title">CARTERA ACTIVA SHORT MULTI-SLOT Y RIESGO ADAPTATIVO</div>
             <table>
                 <thead>
                     <tr>
@@ -115,7 +112,7 @@
                         <th>PRECIO ACTUAL</th>
                         <th>STOP LOSS (SL)</th>
                         <th>TAKE PROFIT (TP)</th>
-                        <th>ESTADO RIESGO</th>
+                        <th>DISPARADOR</th>
                     </tr>
                 </thead>
                 <tbody id="pos-table">
@@ -124,14 +121,13 @@
             </table>
 
             <div class="panel-box" style="margin-top: 20px;">
-                <div class="panel-title">CURVA DE CRECIMIENTO DEL CAPITAL (BOLA DE NIEVE)</div>
+                <div class="panel-title">CURVA DE CRECIMIENTO DEL CAPITAL (EQUITY)</div>
                 <div class="chart-container">
                     <canvas id="equityChart"></canvas>
                 </div>
             </div>
         </div>
 
-        <!-- DERECHA: MOTOR DE ASESORÍA Y DECISIONES IA -->
         <div>
             <div class="panel-box" style="height: 100%;">
                 <div class="panel-title">MOTOR DE ASESORÍA CUANTITATIVA</div>
@@ -142,11 +138,11 @@
                         <span class="badge-status">EJECUTANDO</span>
                     </div>
                     <div style="font-size: 10px; color: var(--text-main);" id="guardian-status">
-                        EVALUANDO LIQUIDEZ Y EMA 200 EN TIEMPO REAL.
+                        EVALUANDO TENDENCIA Y RIESGO MACRO BTC.
                     </div>
                 </div>
 
-                <div class="panel-title" style="margin-top: 20px; font-size: 10px;">MATRIZ DE RAZONAMIENTO Y DECISIONES IA</div>
+                <div class="panel-title" style="margin-top: 20px; font-size: 10px;">MATRIZ DE RAZONAMIENTO Y DECISIONES SHORT</div>
                 <div class="logs-container" id="logs-list">
                     <div class="log-entry">INICIALIZANDO MONITOREO DE EVENTOS...</div>
                 </div>
@@ -159,127 +155,128 @@
         const CAPITAL_INICIAL = 3300.0;
 
         async function loadDashboard() {
-            // 1. Cargar Posiciones Activas
             try {
                 const res = await fetch('posiciones.json');
                 if (res.ok) {
                     const data = await res.json();
-                    const keys = Object.keys(data);
-                    document.getElementById('slots-count').innerText = keys.length + ' / 4';
+                    
+                    const lastUpdate = data.last_update || 'N/A';
+                    document.getElementById('last-update').innerText = lastUpdate;
+                    
+                    if(data.macro_status) {
+                        document.getElementById('macro-status').innerText = `MACRO: ${data.macro_status}`;
+                    }
+
+                    // Parseo correcto: Extraer slots únicamente de slots_activos
+                    const slotsActivos = Array.isArray(data.slots_activos) ? data.slots_activos : [];
+                    document.getElementById('slots-count').innerText = slotsActivos.length + ' / 4';
 
                     const tbody = document.getElementById('pos-table');
-                    if (keys.length > 0) {
-                        tbody.innerHTML = keys.map(k => {
-                            const p = data[k];
-                            const entry = p.precio_entrada || p.entry_price || 0;
-                            const current = p.precio_actual || entry;
-                            const sl = p.stop_loss ? `$${p.stop_loss}` : (p.sl_pct ? `-${p.sl_pct}%` : 'N/A');
-                            const tp = p.take_profit ? `$${p.take_profit}` : (p.tp_pct ? `+${p.tp_pct}%` : 'N/A');
-                            const estado = p.estado_sl || 'RIESGO ADAPTATIVO';
+                    if (slotsActivos.length > 0) {
+                        tbody.innerHTML = slotsActivos.map(p => {
+                            const symbol = p.symbol || 'N/A';
+                            const entry = p.entry_price ? `$${p.entry_price}` : 'N/A';
+                            const current = p.precio_actual ? `$${p.precio_actual}` : entry;
+                            const sl = p.stop_loss ? `$${p.stop_loss}` : 'N/A';
+                            const tp = p.take_profit ? `$${p.take_profit}` : 'N/A';
+                            const trigger = p.trigger_type || 'SHORT_SIGNAL';
 
                             return `<tr>
-                                <td><b style="color:var(--accent-cyan)">${k.toUpperCase()}</b></td>
-                                <td>$${entry}</td>
-                                <td style="color:var(--accent-green)">$${current}</td>
+                                <td><b style="color:var(--accent-cyan)">${symbol.toUpperCase()}</b></td>
+                                <td>${entry}</td>
+                                <td style="color:var(--accent-red)">${current}</td>
                                 <td style="color:var(--accent-red)">${sl}</td>
                                 <td style="color:var(--accent-green)">${tp}</td>
-                                <td><span class="badge-status">${estado}</span></td>
+                                <td><span class="badge-status">${trigger}</span></td>
                             </tr>`;
                         }).join('');
                     } else {
-                        tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: var(--text-muted);">SIN POSICIONES ABIERTAS ACTUALMENTE.</td></tr>`;
+                        tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: var(--text-muted);">SIN POSICIONES CORTAS ABIERTAS.</td></tr>`;
+                    }
+
+                    if (Array.isArray(data.decisiones_log) && data.decisiones_log.length > 0) {
+                        document.getElementById('guardian-status').innerText = data.decisiones_log[0];
                     }
                 }
             } catch (e) { console.log("Error posiciones:", e); }
 
-            // 2. Cargar Historial, KPIs completos y Gráfico
             try {
                 const resH = await fetch('historial.json');
                 if (resH.ok) {
-                    const historial = await resH.json();
-                    if (historial.length > 0) {
-                        const last = historial[historial.length - 1];
-                        document.getElementById('last-update').innerText = last.timestamp || last.fecha || 'ACTUALIZADO';
-                        
-                        const capitalActual = last.capital || CAPITAL_INICIAL;
-                        document.getElementById('capital-val').innerText = `$${capitalActual.toFixed(2)}`;
-                        
-                        // PnL Neto
-                        const pnlVal = capitalActual - CAPITAL_INICIAL;
-                        const pnlPct = (pnlVal / CAPITAL_INICIAL) * 100;
-                        const pnlElement = document.getElementById('pnl-neto');
-                        pnlElement.innerText = `${pnlVal >= 0 ? '+' : ''}$${pnlVal.toFixed(2)} (${pnlPct.toFixed(2)}%)`;
-                        pnlElement.style.color = pnlVal >= 0 ? 'var(--accent-green)' : 'var(--accent-red)';
+                    const dataH = await resH.json();
+                    const operaciones = Array.isArray(dataH.operaciones) ? dataH.operaciones : [];
+                    
+                    const opsCerradas = operaciones.length;
+                    document.getElementById('ops-count').innerText = `${opsCerradas} / 100`;
+                    document.getElementById('ops-progress').innerText = `Progreso: ${((opsCerradas / 100) * 100).toFixed(1)}% Fase`;
 
-                        // Operaciones Cerradas (Contador 100 ops)
-                        const opsCerradas = historial.filter(h => {
-                            const acc = (h.accion || h.result || '').toUpperCase();
-                            return acc.includes('STOP_LOSS') || acc.includes('TAKE_PROFIT') || acc.includes('VENTA');
-                        }).length;
+                    let capitalActual = CAPITAL_INICIAL;
+                    let ganadoras = 0, gananciasUSD = 0, perdidasUSD = 0;
 
-                        document.getElementById('ops-count').innerText = `${opsCerradas} / 100`;
-                        const progresoPct = ((opsCerradas / 100) * 100).toFixed(1);
-                        document.getElementById('ops-progress').innerText = `Progreso: ${progresoPct}% Fase`;
-
-                        // Win Rate y Profit Factor
-                        let ganadoras = 0, gananciasUSD = 0, perdidasUSD = 0;
-                        historial.forEach(h => {
-                            const acc = (h.accion || h.result || '').toUpperCase();
-                            if (acc.includes('TAKE_PROFIT') || (h.pnl_usd && h.pnl_usd > 0)) {
-                                ganadoras++;
-                                gananciasUSD += (h.pnl_usd || 0);
-                            } else if (acc.includes('STOP_LOSS') || (h.pnl_usd && h.pnl_usd < 0)) {
-                                perdidasUSD += Math.abs(h.pnl_usd || 0);
-                            }
-                        });
-
-                        if (opsCerradas > 0) {
-                            document.getElementById('win-rate').innerText = `${((ganadoras / opsCerradas) * 100).toFixed(1)}%`;
-                            document.getElementById('profit-factor').innerText = perdidasUSD > 0 ? (gananciasUSD / perdidasUSD).toFixed(2) : (gananciasUSD > 0 ? 'INF' : '0.00');
+                    operaciones.forEach(op => {
+                        const pnl = op.pnl_usd || 0;
+                        capitalActual += pnl;
+                        if (pnl > 0) {
+                            ganadoras++;
+                            gananciasUSD += pnl;
+                        } else if (pnl < 0) {
+                            perdidasUSD += Math.abs(pnl);
                         }
+                    });
 
-                        // Matriz de Logs y Estado Guardián
-                        const logsDiv = document.getElementById('logs-list');
-                        logsDiv.innerHTML = historial.slice().reverse().map(h => {
-                            const time = h.timestamp || h.fecha || '';
-                            const text = h.razonamiento || h.accion || h.result || JSON.stringify(h);
-                            return `<div class="log-entry"><span class="log-time">[${time}]</span> ${text}</div>`;
-                        }).join('');
+                    document.getElementById('capital-val').innerText = `$${capitalActual.toFixed(2)}`;
+                    const pnlVal = capitalActual - CAPITAL_INICIAL;
+                    const pnlPct = (pnlVal / CAPITAL_INICIAL) * 100;
+                    const pnlElement = document.getElementById('pnl-neto');
+                    pnlElement.innerText = `${pnlVal >= 0 ? '+' : ''}$${pnlVal.toFixed(2)} (${pnlPct.toFixed(2)}%)`;
+                    pnlElement.style.color = pnlVal >= 0 ? 'var(--accent-green)' : 'var(--accent-red)';
 
-                        const ultimoRegistro = historial[historial.length - 1];
-                        document.getElementById('guardian-status').innerText = ultimoRegistro.razonamiento || ultimoRegistro.accion || "GUARDIÁN ADAPTATIVO ACTIVO.";
-
-                        // Gráfico Equity
-                        const labels = historial.map(h => h.timestamp || h.fecha || '');
-                        const capitalData = historial.map(h => h.capital || CAPITAL_INICIAL);
-
-                        if (chartInstance) chartInstance.destroy();
-                        const ctx = document.getElementById('equityChart').getContext('2d');
-                        chartInstance = new Chart(ctx, {
-                            type: 'line',
-                            data: {
-                                labels: labels,
-                                datasets: [{
-                                    label: 'CAPITAL ($)',
-                                    data: capitalData,
-                                    borderColor: '#00f0ff',
-                                    backgroundColor: 'rgba(0, 240, 255, 0.05)',
-                                    fill: true,
-                                    tension: 0.1,
-                                    borderWidth: 1.5
-                                }]
-                            },
-                            options: {
-                                responsive: true,
-                                maintainAspectRatio: false,
-                                plugins: { legend: { display: false } },
-                                scales: {
-                                    x: { ticks: { color: '#6e7681', font: { size: 8 } }, grid: { color: '#1a2333' } },
-                                    y: { ticks: { color: '#6e7681', font: { size: 8 } }, grid: { color: '#1a2333' } }
-                                }
-                            }
-                        });
+                    if (opsCerradas > 0) {
+                        document.getElementById('win-rate').innerText = `${((ganadoras / opsCerradas) * 100).toFixed(1)}%`;
+                        document.getElementById('profit-factor').innerText = perdidasUSD > 0 ? (gananciasUSD / perdidasUSD).toFixed(2) : (gananciasUSD > 0 ? 'INF' : '0.00');
                     }
+
+                    const logsDiv = document.getElementById('logs-list');
+                    if (operaciones.length > 0) {
+                        logsDiv.innerHTML = operaciones.slice().reverse().map(op => {
+                            return `<div class="log-entry"><span class="log-time">[${op.timestamp || ''}]</span> ${op.side} ${op.symbol} | Razón: ${op.reason} | PnL: $${op.pnl_usd}</div>`;
+                        }).join('');
+                    }
+
+                    // Gráfico
+                    const labels = operaciones.map(op => op.timestamp || '');
+                    let runCap = CAPITAL_INICIAL;
+                    const capitalData = operaciones.map(op => {
+                        runCap += (op.pnl_usd || 0);
+                        return runCap;
+                    });
+
+                    if (chartInstance) chartInstance.destroy();
+                    const ctx = document.getElementById('equityChart').getContext('2d');
+                    chartInstance = new Chart(ctx, {
+                        type: 'line',
+                        data: {
+                            labels: labels.length > 0 ? labels : ['INICIO'],
+                            datasets: [{
+                                label: 'CAPITAL ($)',
+                                data: capitalData.length > 0 ? capitalData : [CAPITAL_INICIAL],
+                                borderColor: '#00f0ff',
+                                backgroundColor: 'rgba(0, 240, 255, 0.05)',
+                                fill: true,
+                                tension: 0.1,
+                                borderWidth: 1.5
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: { legend: { display: false } },
+                            scales: {
+                                x: { ticks: { color: '#6e7681', font: { size: 8 } }, grid: { color: '#1a2333' } },
+                                y: { ticks: { color: '#6e7681', font: { size: 8 } }, grid: { color: '#1a2333' } }
+                            }
+                        }
+                    });
                 }
             } catch (e) { console.log("Error historial:", e); }
         }
