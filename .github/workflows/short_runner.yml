@@ -1,0 +1,36 @@
+name: G-SENTINEL PATA 4 // NEXUS SHORT ENGINE AUTO-SYNC
+
+on:
+  schedule:
+    - cron: '0 * * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  run-nexus-short:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Código
+        uses: actions/checkout@v4
+
+      - name: Configurar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Instalar Librerías
+        run: |
+          python -m pip install --upgrade pip
+          pip install numpy pandas
+
+      - name: Ejecutar Motor Cripto SHORT
+        run: python main.py
+
+      - name: Commit y Push de Posiciones e Historial JSON
+        run: |
+          git config --global user.name "G-SENTINEL-BOT"
+          git config --global user.email "bot@g-sentinel.local"
+          git add posiciones.json historial.json candidatas.json
+          git diff --quiet && git diff --staged --quiet || (git commit -m "update: Pata 4 NEXUS SHORT auto-sync [skip ci]" && git push)
