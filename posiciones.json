@@ -30,7 +30,7 @@
             "label": "Dogecoin",
             "side": "SHORT",
             "entry_price": 0.09,
-            "precio_actual": 0.0904,
+            "precio_actual": 0.0907,
             "stop_loss": 0.0912,
             "take_profit": 0.0871,
             "timestamp": "2026-09-09 05:49:00 UTC",
@@ -38,13 +38,28 @@
             "risk_allocated": 37.12,
             "trigger_type": "LOCAL_WEAKNESS",
             "rsi": 43.2
+        },
+        {
+            "pair": "BTC-USD",
+            "symbol": "BTC",
+            "label": "Bitcoin",
+            "side": "SHORT",
+            "entry_price": 79298.9,
+            "precio_actual": 79298.9,
+            "stop_loss": 79775.63,
+            "take_profit": 78250.094,
+            "timestamp": "2026-09-09 07:14:30 UTC",
+            "allocated_capital": 825.0,
+            "risk_allocated": 24.75,
+            "trigger_type": "EXHAUSTION_REVERSAL",
+            "rsi": 68.9
         }
     ],
     "capital_libre": 3102.0,
-    "last_update": "2026-09-09 06:17:35 UTC",
+    "last_update": "2026-09-09 07:14:30 UTC",
     "macro_status": "BULLISH_TREND_CRYPTO",
     "decisiones_log": [
         "⚡ G-CORE NEXUS SHORT V4.3 // MACRO BTC: BULLISH_TREND_CRYPTO | Risk Factor: 50% ($24.75)",
-        "❌ SL CERRADO en SHORT ETH | PnL: $-49.50"
+        "🚀 SHORT ENTRY: BTC a $79298.9000 | SL: $79775.6300 | TP: $78250.0940"
     ]
 }
