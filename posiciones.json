@@ -45,7 +45,7 @@
             "label": "Bitcoin",
             "side": "SHORT",
             "entry_price": 79298.9,
-            "precio_actual": 78585.21,
+            "precio_actual": 78842.1,
             "stop_loss": 80884.878,
             "take_profit": 78250.094,
             "timestamp": "2026-09-09 07:14:30 UTC",
@@ -60,8 +60,8 @@
             "label": "Ethereum",
             "side": "SHORT",
             "entry_price": 2517.42,
-            "precio_actual": 2490.5,
-            "stop_loss": 2517.42,
+            "precio_actual": 2496.44,
+            "stop_loss": 2567.7684,
             "take_profit": 2475.8989,
             "timestamp": "2026-09-09 08:14:30 UTC",
             "allocated_capital": 825.0,
@@ -75,7 +75,7 @@
             "label": "Solana",
             "side": "SHORT",
             "entry_price": 102.54,
-            "precio_actual": 102.83,
+            "precio_actual": 103.33,
             "stop_loss": 103.8814,
             "take_profit": 99.5889,
             "timestamp": "2026-09-09 15:13:24 UTC",
@@ -86,11 +86,10 @@
         }
     ],
     "capital_libre": 3156.45,
-    "last_update": "2026-09-09 16:14:39 UTC",
+    "last_update": "2026-09-09 17:12:35 UTC",
     "macro_status": "STRONG_BEARISH_CRYPTO",
     "decisiones_log": [
         "⚡ G-CORE NEXUS SHORT V4.3 // MACRO BTC: STRONG_BEARISH_CRYPTO | Risk Factor: 100% ($49.50)",
-        "🛡️ Break-Even activado para SHORT DOGE a $0.0900",
-        "🛡️ Break-Even activado para SHORT ETH a $2517.4200"
+        "🛡️ Break-Even activado para SHORT DOGE a $0.0900"
     ]
 }
