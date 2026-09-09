@@ -7,14 +7,13 @@ import pandas as pd
 from datetime import datetime, timezone
 
 # -------------------------------------------------------------------
-# CONFIGURACIÓN G-CORE: PATA 4 (NEXUS SHORT // COINBASE ENGINE V4.2)
+# CONFIGURACIÓN G-CORE: PATA 4 (NEXUS SHORT // COINBASE ENGINE V4.3)
 # -------------------------------------------------------------------
 CAPITAL_INICIAL = 3300.0
 SLOTS_TOTALES = 4
 CAPITAL_POR_SLOT = CAPITAL_INICIAL / SLOTS_TOTALES
 RIESGO_BASE_SLOT = CAPITAL_INICIAL * 0.015
 
-# Pares oficial en Coinbase (Resistente a Rate-Limits)
 UNIVERSO_CRYPTO = {
     "BTC-USD": {"symbol": "BTC", "label": "Bitcoin"},
     "ETH-USD": {"symbol": "ETH", "label": "Ethereum"},
@@ -31,7 +30,11 @@ def cargar_json(filename, default_data):
     if os.path.exists(filename):
         with open(filename, "r", encoding="utf-8") as f:
             try:
-                return json.load(f)
+                data = json.load(f)
+                # Sanitización automática de compatibilidad
+                if isinstance(default_data, dict) and isinstance(data, list):
+                    return {"operaciones": data, "metricas": {"win_rate": 0.0, "profit_factor": 1.0}}
+                return data
             except json.JSONDecodeError:
                 return default_data
     return default_data
@@ -41,7 +44,6 @@ def guardar_json(filename, data):
         json.dump(data, f, indent=4, ensure_ascii=False)
 
 def get_coinbase_candles(pair, granularity=3600):
-    """Obtiene velas horarias directo de Coinbase Pro public API"""
     try:
         url = f"https://api.exchange.coinbase.com/products/{pair}/candles?granularity={granularity}"
         req = urllib.request.Request(url, headers=HEADERS)
@@ -49,8 +51,6 @@ def get_coinbase_candles(pair, granularity=3600):
             data = json.loads(response.read().decode('utf-8'))
             if not data or len(data) < 30:
                 return None
-            
-            # Coinbase retorna: [time, low, high, open, close, volume]
             df = pd.DataFrame(data, columns=['time', 'Low', 'High', 'Open', 'Close', 'Volume'])
             df = df.sort_values('time').reset_index(drop=True)
             return df
@@ -105,11 +105,17 @@ def ejecutar_motor_cuantitativo_short_crypto():
     posiciones = cargar_json(POSICIONES_FILE, {"slots_activos": [], "capital_libre": CAPITAL_INICIAL})
     historial = cargar_json(HISTORIAL_FILE, {"operaciones": [], "metricas": {"win_rate": 0.0, "profit_factor": 1.0}})
     
+    # Garantizar estructura de diccionario en historial
+    if not isinstance(historial, dict):
+        historial = {"operaciones": [], "metricas": {"win_rate": 0.0, "profit_factor": 1.0}}
+    if "operaciones" not in historial or not isinstance(historial["operaciones"], list):
+        historial["operaciones"] = []
+
     regimen_macro, distancia_btc, sizing_factor = obtener_regimen_macro_btc()
     riesgo_actual_slot = RIESGO_BASE_SLOT * sizing_factor
     
     decisiones_log = []
-    decisiones_log.append(f"⚡ G-CORE NEXUS SHORT V4.2 // MACRO BTC: {regimen_macro} | Risk Factor: {sizing_factor*100:.0f}% (${riesgo_actual_slot:.2f})")
+    decisiones_log.append(f"⚡ G-CORE NEXUS SHORT V4.3 // MACRO BTC: {regimen_macro} | Risk Factor: {sizing_factor*100:.0f}% (${riesgo_actual_slot:.2f})")
     
     slots_restantes = []
     capital_acumulado = posiciones.get("capital_libre", CAPITAL_INICIAL)
