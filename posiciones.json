@@ -30,7 +30,7 @@
             "label": "Dogecoin",
             "side": "SHORT",
             "entry_price": 0.09,
-            "precio_actual": 0.0911,
+            "precio_actual": 0.0898,
             "stop_loss": 0.0912,
             "take_profit": 0.0871,
             "timestamp": "2026-09-09 05:49:00 UTC",
@@ -45,7 +45,7 @@
             "label": "Bitcoin",
             "side": "SHORT",
             "entry_price": 79298.9,
-            "precio_actual": 79492.98,
+            "precio_actual": 78930.93,
             "stop_loss": 79775.63,
             "take_profit": 78250.094,
             "timestamp": "2026-09-09 07:14:30 UTC",
@@ -60,7 +60,7 @@
             "label": "Ethereum",
             "side": "SHORT",
             "entry_price": 2517.42,
-            "precio_actual": 2511.08,
+            "precio_actual": 2496.9,
             "stop_loss": 2567.7684,
             "take_profit": 2475.8989,
             "timestamp": "2026-09-09 08:14:30 UTC",
@@ -75,8 +75,8 @@
             "label": "Solana",
             "side": "SHORT",
             "entry_price": 104.77,
-            "precio_actual": 104.46,
-            "stop_loss": 106.8654,
+            "precio_actual": 103.45,
+            "stop_loss": 104.77,
             "take_profit": 102.6274,
             "timestamp": "2026-09-09 08:14:30 UTC",
             "allocated_capital": 825.0,
@@ -86,9 +86,10 @@
         }
     ],
     "capital_libre": 3102.0,
-    "last_update": "2026-09-09 13:14:44 UTC",
-    "macro_status": "BULLISH_TREND_CRYPTO",
+    "last_update": "2026-09-09 14:13:50 UTC",
+    "macro_status": "WEAK_BEARISH_CRYPTO",
     "decisiones_log": [
-        "⚡ G-CORE NEXUS SHORT V4.3 // MACRO BTC: BULLISH_TREND_CRYPTO | Risk Factor: 50% ($24.75)"
+        "⚡ G-CORE NEXUS SHORT V4.3 // MACRO BTC: WEAK_BEARISH_CRYPTO | Risk Factor: 75% ($37.12)",
+        "🛡️ Break-Even activado para SHORT SOL a $104.7700"
     ]
 }
