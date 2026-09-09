@@ -48,6 +48,13 @@
             "side": "SHORT",
             "pnl_usd": 54.45,
             "reason": "TAKE_PROFIT"
+        },
+        {
+            "timestamp": "2026-09-09 22:12:27 UTC",
+            "symbol": "BTC",
+            "side": "SHORT",
+            "pnl_usd": 54.45,
+            "reason": "TAKE_PROFIT"
         }
     ],
     "metricas": {
