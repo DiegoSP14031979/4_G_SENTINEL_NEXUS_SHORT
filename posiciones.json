@@ -30,7 +30,7 @@
             "label": "Dogecoin",
             "side": "SHORT",
             "entry_price": 0.09,
-            "precio_actual": 0.0907,
+            "precio_actual": 0.0911,
             "stop_loss": 0.0912,
             "take_profit": 0.0871,
             "timestamp": "2026-09-09 05:49:00 UTC",
@@ -45,7 +45,7 @@
             "label": "Bitcoin",
             "side": "SHORT",
             "entry_price": 79298.9,
-            "precio_actual": 79298.9,
+            "precio_actual": 79517.96,
             "stop_loss": 79775.63,
             "take_profit": 78250.094,
             "timestamp": "2026-09-09 07:14:30 UTC",
@@ -53,13 +53,44 @@
             "risk_allocated": 24.75,
             "trigger_type": "EXHAUSTION_REVERSAL",
             "rsi": 68.9
+        },
+        {
+            "pair": "ETH-USD",
+            "symbol": "ETH",
+            "label": "Ethereum",
+            "side": "SHORT",
+            "entry_price": 2517.42,
+            "precio_actual": 2517.42,
+            "stop_loss": 2536.2932,
+            "take_profit": 2475.8989,
+            "timestamp": "2026-09-09 08:14:30 UTC",
+            "allocated_capital": 825.0,
+            "risk_allocated": 24.75,
+            "trigger_type": "EXHAUSTION_REVERSAL",
+            "rsi": 66.8
+        },
+        {
+            "pair": "SOL-USD",
+            "symbol": "SOL",
+            "label": "Solana",
+            "side": "SHORT",
+            "entry_price": 104.77,
+            "precio_actual": 104.77,
+            "stop_loss": 105.7439,
+            "take_profit": 102.6274,
+            "timestamp": "2026-09-09 08:14:30 UTC",
+            "allocated_capital": 825.0,
+            "risk_allocated": 24.75,
+            "trigger_type": "EXHAUSTION_REVERSAL",
+            "rsi": 69.1
         }
     ],
     "capital_libre": 3102.0,
-    "last_update": "2026-09-09 07:14:30 UTC",
+    "last_update": "2026-09-09 08:14:30 UTC",
     "macro_status": "BULLISH_TREND_CRYPTO",
     "decisiones_log": [
         "⚡ G-CORE NEXUS SHORT V4.3 // MACRO BTC: BULLISH_TREND_CRYPTO | Risk Factor: 50% ($24.75)",
-        "🚀 SHORT ENTRY: BTC a $79298.9000 | SL: $79775.6300 | TP: $78250.0940"
+        "🚀 SHORT ENTRY: ETH a $2517.4200 | SL: $2536.2932 | TP: $2475.8989",
+        "🚀 SHORT ENTRY: SOL a $104.7700 | SL: $105.7439 | TP: $102.6274"
     ]
 }
