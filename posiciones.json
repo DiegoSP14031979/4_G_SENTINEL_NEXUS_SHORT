@@ -25,27 +25,12 @@
     },
     "slots_activos": [
         {
-            "pair": "ETH-USD",
-            "symbol": "ETH",
-            "label": "Ethereum",
-            "side": "SHORT",
-            "entry_price": 2474.58,
-            "precio_actual": 2491.36,
-            "stop_loss": 2493.4554,
-            "take_profit": 2433.0542,
-            "timestamp": "2026-09-08 07:51:35 UTC",
-            "allocated_capital": 825.0,
-            "risk_allocated": 49.5,
-            "trigger_type": "BREAKOUT_BEARISH",
-            "rsi": 38.5
-        },
-        {
             "pair": "DOGE-USD",
             "symbol": "DOGE",
             "label": "Dogecoin",
             "side": "SHORT",
             "entry_price": 0.09,
-            "precio_actual": 0.0901,
+            "precio_actual": 0.0904,
             "stop_loss": 0.0912,
             "take_profit": 0.0871,
             "timestamp": "2026-09-09 05:49:00 UTC",
@@ -55,10 +40,11 @@
             "rsi": 43.2
         }
     ],
-    "capital_libre": 3151.5,
-    "last_update": "2026-09-09 05:51:29 UTC",
-    "macro_status": "WEAK_BEARISH_CRYPTO",
+    "capital_libre": 3102.0,
+    "last_update": "2026-09-09 06:17:35 UTC",
+    "macro_status": "BULLISH_TREND_CRYPTO",
     "decisiones_log": [
-        "⚡ G-CORE NEXUS SHORT V4.3 // MACRO BTC: WEAK_BEARISH_CRYPTO | Risk Factor: 75% ($37.12)"
+        "⚡ G-CORE NEXUS SHORT V4.3 // MACRO BTC: BULLISH_TREND_CRYPTO | Risk Factor: 50% ($24.75)",
+        "❌ SL CERRADO en SHORT ETH | PnL: $-49.50"
     ]
 }
