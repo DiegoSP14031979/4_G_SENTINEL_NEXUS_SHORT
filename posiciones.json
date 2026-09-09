@@ -45,7 +45,7 @@
             "label": "Dogecoin",
             "side": "SHORT",
             "entry_price": 0.09,
-            "precio_actual": 0.09,
+            "precio_actual": 0.0901,
             "stop_loss": 0.0912,
             "take_profit": 0.0871,
             "timestamp": "2026-09-09 05:49:00 UTC",
@@ -56,13 +56,9 @@
         }
     ],
     "capital_libre": 3151.5,
-    "last_update": "2026-09-09 05:49:00 UTC",
+    "last_update": "2026-09-09 05:51:29 UTC",
     "macro_status": "WEAK_BEARISH_CRYPTO",
     "decisiones_log": [
-        "⚡ G-CORE NEXUS SHORT V4.3 // MACRO BTC: WEAK_BEARISH_CRYPTO | Risk Factor: 75% ($37.12)",
-        "❌ SL CERRADO en SHORT BTC | PnL: $-49.50",
-        "❌ SL CERRADO en SHORT SOL | PnL: $-49.50",
-        "❌ SL CERRADO en SHORT XRP | PnL: $-49.50",
-        "🚀 SHORT ENTRY: DOGE a $0.0900 | SL: $0.0912 | TP: $0.0871"
+        "⚡ G-CORE NEXUS SHORT V4.3 // MACRO BTC: WEAK_BEARISH_CRYPTO | Risk Factor: 75% ($37.12)"
     ]
 }
