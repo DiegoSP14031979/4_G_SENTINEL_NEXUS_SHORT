@@ -30,7 +30,7 @@
             "label": "Ethereum",
             "side": "SHORT",
             "entry_price": 2466.25,
-            "precio_actual": 2417.96,
+            "precio_actual": 2433.2,
             "stop_loss": 2466.25,
             "take_profit": 2403.8423,
             "timestamp": "2026-09-09 20:13:45 UTC",
@@ -45,7 +45,7 @@
             "label": "Bitcoin",
             "side": "SHORT",
             "entry_price": 77913.4,
-            "precio_actual": 76912.32,
+            "precio_actual": 76959.32,
             "stop_loss": 77913.4,
             "take_profit": 76181.9961,
             "timestamp": "2026-09-09 22:12:27 UTC",
@@ -60,7 +60,7 @@
             "label": "Solana",
             "side": "SHORT",
             "entry_price": 98.95,
-            "precio_actual": 98.95,
+            "precio_actual": 99.51,
             "stop_loss": 100.2593,
             "take_profit": 96.0696,
             "timestamp": "2026-09-10 13:13:16 UTC",
@@ -75,7 +75,7 @@
             "label": "Ripple",
             "side": "SHORT",
             "entry_price": 1.353,
-            "precio_actual": 1.353,
+            "precio_actual": 1.3642,
             "stop_loss": 1.3711,
             "take_profit": 1.3132,
             "timestamp": "2026-09-10 13:13:16 UTC",
@@ -86,17 +86,11 @@
         }
     ],
     "capital_libre": 3564.81,
-    "last_update": "2026-09-10 13:13:16 UTC",
+    "last_update": "2026-09-10 14:13:09 UTC",
     "macro_status": "STRONG_BEARISH_CRYPTO",
     "decisiones_log": [
         "⚡ G-CORE NEXUS SHORT V4.3 // MACRO BTC: STRONG_BEARISH_CRYPTO | Risk Factor: 100% ($49.50)",
-        "🛡️ Break-Even activado para SHORT SOL a $102.5400",
-        "🎯 TP CERRADO en SHORT SOL | PnL: +$108.90",
         "🛡️ Break-Even activado para SHORT ETH a $2466.2500",
-        "🛡️ Break-Even activado para SHORT XRP a $1.4013",
-        "🎯 TP CERRADO en SHORT XRP | PnL: +$108.90",
-        "🛡️ Break-Even activado para SHORT BTC a $77913.4000",
-        "🚀 SHORT ENTRY: SOL a $98.9500 | SL: $100.2593 | TP: $96.0696",
-        "🚀 SHORT ENTRY: XRP a $1.3530 | SL: $1.3711 | TP: $1.3132"
+        "🛡️ Break-Even activado para SHORT BTC a $77913.4000"
     ]
 }
