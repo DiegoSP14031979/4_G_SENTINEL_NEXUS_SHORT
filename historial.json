@@ -55,6 +55,20 @@
             "side": "SHORT",
             "pnl_usd": 54.45,
             "reason": "TAKE_PROFIT"
+        },
+        {
+            "timestamp": "2026-09-10 13:13:16 UTC",
+            "symbol": "SOL",
+            "side": "SHORT",
+            "pnl_usd": 108.9,
+            "reason": "TAKE_PROFIT"
+        },
+        {
+            "timestamp": "2026-09-10 13:13:16 UTC",
+            "symbol": "XRP",
+            "side": "SHORT",
+            "pnl_usd": 108.9,
+            "reason": "TAKE_PROFIT"
         }
     ],
     "metricas": {
