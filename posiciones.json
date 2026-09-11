@@ -30,7 +30,7 @@
             "label": "Ethereum",
             "side": "SHORT",
             "entry_price": 2466.25,
-            "precio_actual": 2468.73,
+            "precio_actual": 2463.27,
             "stop_loss": 2515.575,
             "take_profit": 2403.8423,
             "timestamp": "2026-09-09 20:13:45 UTC",
@@ -45,7 +45,7 @@
             "label": "Bitcoin",
             "side": "SHORT",
             "entry_price": 77913.4,
-            "precio_actual": 77324.68,
+            "precio_actual": 77143.02,
             "stop_loss": 79471.668,
             "take_profit": 76181.9961,
             "timestamp": "2026-09-09 22:12:27 UTC",
@@ -60,7 +60,7 @@
             "label": "Solana",
             "side": "SHORT",
             "entry_price": 98.95,
-            "precio_actual": 99.86,
+            "precio_actual": 99.5,
             "stop_loss": 100.2593,
             "take_profit": 96.0696,
             "timestamp": "2026-09-10 13:13:16 UTC",
@@ -75,7 +75,7 @@
             "label": "Ripple",
             "side": "SHORT",
             "entry_price": 1.353,
-            "precio_actual": 1.3577,
+            "precio_actual": 1.3484,
             "stop_loss": 1.3801,
             "take_profit": 1.3132,
             "timestamp": "2026-09-10 13:13:16 UTC",
@@ -86,9 +86,9 @@
         }
     ],
     "capital_libre": 3564.81,
-    "last_update": "2026-09-11 07:13:52 UTC",
-    "macro_status": "WEAK_BEARISH_CRYPTO",
+    "last_update": "2026-09-11 08:14:49 UTC",
+    "macro_status": "STRONG_BEARISH_CRYPTO",
     "decisiones_log": [
-        "⚡ G-CORE NEXUS SHORT V4.3 // MACRO BTC: WEAK_BEARISH_CRYPTO | Risk Factor: 75% ($37.12)"
+        "⚡ G-CORE NEXUS SHORT V4.3 // MACRO BTC: STRONG_BEARISH_CRYPTO | Risk Factor: 100% ($49.50)"
     ]
 }
