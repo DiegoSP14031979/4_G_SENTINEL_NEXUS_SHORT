@@ -30,7 +30,7 @@
             "label": "Bitcoin",
             "side": "SHORT",
             "entry_price": 77913.4,
-            "precio_actual": 78849.67,
+            "precio_actual": 79085.84,
             "stop_loss": 79471.668,
             "take_profit": 76181.9961,
             "timestamp": "2026-09-09 22:12:27 UTC",
@@ -45,7 +45,7 @@
             "label": "Ethereum",
             "side": "SHORT",
             "entry_price": 2517.69,
-            "precio_actual": 2532.67,
+            "precio_actual": 2536.42,
             "stop_loss": 2540.9368,
             "take_profit": 2466.5471,
             "timestamp": "2026-09-14 03:13:59 UTC",
@@ -60,7 +60,7 @@
             "label": "Solana",
             "side": "SHORT",
             "entry_price": 103.18,
-            "precio_actual": 103.18,
+            "precio_actual": 103.41,
             "stop_loss": 104.2675,
             "take_profit": 100.7875,
             "timestamp": "2026-09-14 18:15:00 UTC",
@@ -74,25 +74,23 @@
             "symbol": "XRP",
             "label": "Ripple",
             "side": "SHORT",
-            "entry_price": 1.4352,
-            "precio_actual": 1.4352,
-            "stop_loss": 1.4577,
-            "take_profit": 1.3857,
-            "timestamp": "2026-09-14 18:15:00 UTC",
+            "entry_price": 1.4582,
+            "precio_actual": 1.4582,
+            "stop_loss": 1.4867,
+            "take_profit": 1.3956,
+            "timestamp": "2026-09-14 19:13:30 UTC",
             "allocated_capital": 825.0,
             "risk_allocated": 24.75,
             "trigger_type": "EXHAUSTION_REVERSAL",
-            "rsi": 82.9
+            "rsi": 76.7
         }
     ],
-    "capital_libre": 3215.85,
-    "last_update": "2026-09-14 18:15:00 UTC",
+    "capital_libre": 3191.1,
+    "last_update": "2026-09-14 19:13:30 UTC",
     "macro_status": "BULLISH_TREND_CRYPTO",
     "decisiones_log": [
         "⚡ G-CORE NEXUS SHORT V4.3 // MACRO BTC: BULLISH_TREND_CRYPTO | Risk Factor: 50% ($24.75)",
         "❌ SL CERRADO en SHORT XRP | PnL: $-24.75",
-        "❌ SL CERRADO en SHORT SOL | PnL: $-24.75",
-        "🚀 SHORT ENTRY: SOL a $103.1800 | SL: $104.2675 | TP: $100.7875",
-        "🚀 SHORT ENTRY: XRP a $1.4352 | SL: $1.4577 | TP: $1.3857"
+        "🚀 SHORT ENTRY: XRP a $1.4582 | SL: $1.4867 | TP: $1.3956"
     ]
 }
