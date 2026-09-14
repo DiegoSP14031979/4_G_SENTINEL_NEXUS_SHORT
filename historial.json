@@ -132,6 +132,13 @@
             "side": "SHORT",
             "pnl_usd": -37.12,
             "reason": "STOP_LOSS"
+        },
+        {
+            "timestamp": "2026-09-14 03:13:59 UTC",
+            "symbol": "ETH",
+            "side": "SHORT",
+            "pnl_usd": -37.12,
+            "reason": "STOP_LOSS"
         }
     ],
     "metricas": {
