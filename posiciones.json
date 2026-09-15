@@ -30,7 +30,7 @@
             "label": "Solana",
             "side": "SHORT",
             "entry_price": 100.7,
-            "precio_actual": 99.06,
+            "precio_actual": 98.9,
             "stop_loss": 100.7,
             "take_profit": 98.2533,
             "timestamp": "2026-09-15 07:15:31 UTC",
@@ -40,27 +40,12 @@
             "rsi": 26.6
         },
         {
-            "pair": "DOGE-USD",
-            "symbol": "DOGE",
-            "label": "Dogecoin",
-            "side": "SHORT",
-            "entry_price": 0.0831,
-            "precio_actual": 0.0816,
-            "stop_loss": 0.0831,
-            "take_profit": 0.0815,
-            "timestamp": "2026-09-15 13:14:39 UTC",
-            "allocated_capital": 825.0,
-            "risk_allocated": 49.5,
-            "trigger_type": "BREAKOUT_BEARISH",
-            "rsi": 40.9
-        },
-        {
             "pair": "BTC-USD",
             "symbol": "BTC",
             "label": "Bitcoin",
             "side": "SHORT",
             "entry_price": 75987.22,
-            "precio_actual": 75987.22,
+            "precio_actual": 76279.13,
             "stop_loss": 76632.7889,
             "take_profit": 74566.9684,
             "timestamp": "2026-09-15 15:13:38 UTC",
@@ -75,7 +60,7 @@
             "label": "Ethereum",
             "side": "SHORT",
             "entry_price": 2411.26,
-            "precio_actual": 2411.26,
+            "precio_actual": 2414.73,
             "stop_loss": 2443.3064,
             "take_profit": 2340.7579,
             "timestamp": "2026-09-15 15:13:38 UTC",
@@ -83,20 +68,31 @@
             "risk_allocated": 49.5,
             "trigger_type": "BREAKOUT_BEARISH",
             "rsi": 16.5
+        },
+        {
+            "pair": "XRP-USD",
+            "symbol": "XRP",
+            "label": "Ripple",
+            "side": "SHORT",
+            "entry_price": 1.3825,
+            "precio_actual": 1.3825,
+            "stop_loss": 1.4108,
+            "take_profit": 1.3202,
+            "timestamp": "2026-09-15 16:13:45 UTC",
+            "allocated_capital": 825.0,
+            "risk_allocated": 49.5,
+            "trigger_type": "LOCAL_WEAKNESS",
+            "rsi": 29.5
         }
     ],
-    "capital_libre": 3483.14,
-    "last_update": "2026-09-15 15:13:38 UTC",
+    "capital_libre": 3592.04,
+    "last_update": "2026-09-15 16:13:45 UTC",
     "macro_status": "STRONG_BEARISH_CRYPTO",
     "decisiones_log": [
         "⚡ G-CORE NEXUS SHORT V4.3 // MACRO BTC: STRONG_BEARISH_CRYPTO | Risk Factor: 100% ($49.50)",
-        "🛡️ Break-Even activado para SHORT BTC a $77913.4000",
-        "🎯 TP CERRADO en SHORT BTC | PnL: +$108.90",
-        "🛡️ Break-Even activado para SHORT ETH a $2485.3000",
-        "🎯 TP CERRADO en SHORT ETH | PnL: +$81.66",
         "🛡️ Break-Even activado para SHORT SOL a $100.7000",
         "🛡️ Break-Even activado para SHORT DOGE a $0.0831",
-        "🚀 SHORT ENTRY: BTC a $75987.2200 | SL: $76632.7889 | TP: $74566.9684",
-        "🚀 SHORT ENTRY: ETH a $2411.2600 | SL: $2443.3064 | TP: $2340.7579"
+        "🎯 TP CERRADO en SHORT DOGE | PnL: +$108.90",
+        "🚀 SHORT ENTRY: XRP a $1.3825 | SL: $1.4108 | TP: $1.3202"
     ]
 }
