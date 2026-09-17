@@ -244,6 +244,13 @@
             "side": "SHORT",
             "pnl_usd": 108.9,
             "reason": "TAKE_PROFIT"
+        },
+        {
+            "timestamp": "2026-09-17 09:13:57 UTC",
+            "symbol": "SOL",
+            "side": "SHORT",
+            "pnl_usd": -49.5,
+            "reason": "STOP_LOSS"
         }
     ],
     "metricas": {
