@@ -30,7 +30,7 @@
             "label": "Bitcoin",
             "side": "SHORT",
             "entry_price": 76851.31,
-            "precio_actual": 77101.62,
+            "precio_actual": 77231.72,
             "stop_loss": 78388.3362,
             "take_profit": 75092.8626,
             "timestamp": "2026-09-15 18:14:21 UTC",
@@ -45,7 +45,7 @@
             "label": "Ripple",
             "side": "SHORT",
             "entry_price": 1.3146,
-            "precio_actual": 1.3087,
+            "precio_actual": 1.3182,
             "stop_loss": 1.3409,
             "take_profit": 1.2198,
             "timestamp": "2026-09-15 19:12:18 UTC",
@@ -60,7 +60,7 @@
             "label": "Ethereum",
             "side": "SHORT",
             "entry_price": 2473.25,
-            "precio_actual": 2463.88,
+            "precio_actual": 2472.27,
             "stop_loss": 2522.715,
             "take_profit": 2412.3344,
             "timestamp": "2026-09-17 14:15:07 UTC",
@@ -74,21 +74,23 @@
             "symbol": "SOL",
             "label": "Solana",
             "side": "SHORT",
-            "entry_price": 102.35,
-            "precio_actual": 102.98,
-            "stop_loss": 103.6443,
-            "take_profit": 99.5026,
-            "timestamp": "2026-09-18 02:13:30 UTC",
+            "entry_price": 104.5,
+            "precio_actual": 104.5,
+            "stop_loss": 105.8125,
+            "take_profit": 101.6125,
+            "timestamp": "2026-09-18 04:13:18 UTC",
             "allocated_capital": 825.0,
             "risk_allocated": 24.75,
             "trigger_type": "EXHAUSTION_REVERSAL",
-            "rsi": 71.6
+            "rsi": 80.9
         }
     ],
-    "capital_libre": 3609.35,
-    "last_update": "2026-09-18 03:13:11 UTC",
+    "capital_libre": 3584.6,
+    "last_update": "2026-09-18 04:13:18 UTC",
     "macro_status": "BULLISH_TREND_CRYPTO",
     "decisiones_log": [
-        "⚡ G-CORE NEXUS SHORT V4.3 // MACRO BTC: BULLISH_TREND_CRYPTO | Risk Factor: 50% ($24.75)"
+        "⚡ G-CORE NEXUS SHORT V4.3 // MACRO BTC: BULLISH_TREND_CRYPTO | Risk Factor: 50% ($24.75)",
+        "❌ SL CERRADO en SHORT SOL | PnL: $-24.75",
+        "🚀 SHORT ENTRY: SOL a $104.5000 | SL: $105.8125 | TP: $101.6125"
     ]
 }
