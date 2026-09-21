@@ -30,7 +30,7 @@
             "label": "Bitcoin",
             "side": "SHORT",
             "entry_price": 81048.25,
-            "precio_actual": 81624.28,
+            "precio_actual": 81514.93,
             "stop_loss": 81943.7125,
             "take_profit": 79078.2325,
             "timestamp": "2026-09-18 19:12:36 UTC",
@@ -45,8 +45,8 @@
             "label": "Ethereum",
             "side": "SHORT",
             "entry_price": 2695.45,
-            "precio_actual": 2695.45,
-            "stop_loss": 2730.7257,
+            "precio_actual": 2664.0,
+            "stop_loss": 2695.45,
             "take_profit": 2617.8434,
             "timestamp": "2026-09-21 00:54:46 UTC",
             "allocated_capital": 825.0,
@@ -60,7 +60,7 @@
             "label": "Solana",
             "side": "SHORT",
             "entry_price": 112.34,
-            "precio_actual": 112.34,
+            "precio_actual": 111.74,
             "stop_loss": 113.9868,
             "take_profit": 108.7171,
             "timestamp": "2026-09-21 00:54:46 UTC",
@@ -75,7 +75,7 @@
             "label": "Ripple",
             "side": "SHORT",
             "entry_price": 1.4302,
-            "precio_actual": 1.4302,
+            "precio_actual": 1.4296,
             "stop_loss": 1.4508,
             "take_profit": 1.3848,
             "timestamp": "2026-09-21 00:54:46 UTC",
@@ -86,15 +86,10 @@
         }
     ],
     "capital_libre": 3173.76,
-    "last_update": "2026-09-21 00:54:46 UTC",
+    "last_update": "2026-09-21 05:59:38 UTC",
     "macro_status": "BULLISH_TREND_CRYPTO",
     "decisiones_log": [
         "⚡ G-CORE NEXUS SHORT V4.3 // MACRO BTC: BULLISH_TREND_CRYPTO | Risk Factor: 50% ($24.75)",
-        "❌ SL CERRADO en SHORT ETH | PnL: $-24.75",
-        "❌ SL CERRADO en SHORT XRP | PnL: $-24.75",
-        "❌ SL CERRADO en SHORT SOL | PnL: $-24.75",
-        "🚀 SHORT ENTRY: ETH a $2695.4500 | SL: $2730.7257 | TP: $2617.8434",
-        "🚀 SHORT ENTRY: SOL a $112.3400 | SL: $113.9868 | TP: $108.7171",
-        "🚀 SHORT ENTRY: XRP a $1.4302 | SL: $1.4508 | TP: $1.3848"
+        "🛡️ Break-Even activado para SHORT ETH a $2695.4500"
     ]
 }
