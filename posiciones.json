@@ -25,28 +25,13 @@
     },
     "slots_activos": [
         {
-            "pair": "BTC-USD",
-            "symbol": "BTC",
-            "label": "Bitcoin",
-            "side": "SHORT",
-            "entry_price": 81048.25,
-            "precio_actual": 81514.93,
-            "stop_loss": 81943.7125,
-            "take_profit": 79078.2325,
-            "timestamp": "2026-09-18 19:12:36 UTC",
-            "allocated_capital": 825.0,
-            "risk_allocated": 24.75,
-            "trigger_type": "EXHAUSTION_REVERSAL",
-            "rsi": 88.1
-        },
-        {
             "pair": "ETH-USD",
             "symbol": "ETH",
             "label": "Ethereum",
             "side": "SHORT",
             "entry_price": 2695.45,
-            "precio_actual": 2664.0,
-            "stop_loss": 2695.45,
+            "precio_actual": 2728.74,
+            "stop_loss": 2749.359,
             "take_profit": 2617.8434,
             "timestamp": "2026-09-21 00:54:46 UTC",
             "allocated_capital": 825.0,
@@ -55,41 +40,61 @@
             "rsi": 88.6
         },
         {
+            "pair": "BTC-USD",
+            "symbol": "BTC",
+            "label": "Bitcoin",
+            "side": "SHORT",
+            "entry_price": 85311.98,
+            "precio_actual": 85311.98,
+            "stop_loss": 86444.9139,
+            "take_profit": 82819.5254,
+            "timestamp": "2026-09-21 12:39:57 UTC",
+            "allocated_capital": 825.0,
+            "risk_allocated": 24.75,
+            "trigger_type": "EXHAUSTION_REVERSAL",
+            "rsi": 84.6
+        },
+        {
             "pair": "SOL-USD",
             "symbol": "SOL",
             "label": "Solana",
             "side": "SHORT",
-            "entry_price": 112.34,
-            "precio_actual": 111.74,
-            "stop_loss": 113.9868,
-            "take_profit": 108.7171,
-            "timestamp": "2026-09-21 00:54:46 UTC",
+            "entry_price": 116.73,
+            "precio_actual": 116.73,
+            "stop_loss": 119.0346,
+            "take_profit": 111.6598,
+            "timestamp": "2026-09-21 12:39:57 UTC",
             "allocated_capital": 825.0,
             "risk_allocated": 24.75,
             "trigger_type": "EXHAUSTION_REVERSAL",
-            "rsi": 77.6
+            "rsi": 82.4
         },
         {
             "pair": "XRP-USD",
             "symbol": "XRP",
             "label": "Ripple",
             "side": "SHORT",
-            "entry_price": 1.4302,
-            "precio_actual": 1.4296,
-            "stop_loss": 1.4508,
-            "take_profit": 1.3848,
-            "timestamp": "2026-09-21 00:54:46 UTC",
+            "entry_price": 1.4935,
+            "precio_actual": 1.4935,
+            "stop_loss": 1.5227,
+            "take_profit": 1.4292,
+            "timestamp": "2026-09-21 12:39:57 UTC",
             "allocated_capital": 825.0,
             "risk_allocated": 24.75,
             "trigger_type": "EXHAUSTION_REVERSAL",
-            "rsi": 80.3
+            "rsi": 79.9
         }
     ],
-    "capital_libre": 3173.76,
-    "last_update": "2026-09-21 05:59:38 UTC",
+    "capital_libre": 3099.51,
+    "last_update": "2026-09-21 12:39:57 UTC",
     "macro_status": "BULLISH_TREND_CRYPTO",
     "decisiones_log": [
         "⚡ G-CORE NEXUS SHORT V4.3 // MACRO BTC: BULLISH_TREND_CRYPTO | Risk Factor: 50% ($24.75)",
-        "🛡️ Break-Even activado para SHORT ETH a $2695.4500"
+        "❌ SL CERRADO en SHORT BTC | PnL: $-24.75",
+        "❌ SL CERRADO en SHORT SOL | PnL: $-24.75",
+        "❌ SL CERRADO en SHORT XRP | PnL: $-24.75",
+        "🚀 SHORT ENTRY: BTC a $85311.9800 | SL: $86444.9139 | TP: $82819.5254",
+        "🚀 SHORT ENTRY: SOL a $116.7300 | SL: $119.0346 | TP: $111.6598",
+        "🚀 SHORT ENTRY: XRP a $1.4935 | SL: $1.5227 | TP: $1.4292"
     ]
 }
