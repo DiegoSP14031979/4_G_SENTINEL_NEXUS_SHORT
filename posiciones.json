@@ -30,7 +30,7 @@
             "label": "Ethereum",
             "side": "SHORT",
             "entry_price": 2695.45,
-            "precio_actual": 2728.74,
+            "precio_actual": 2749.2,
             "stop_loss": 2749.359,
             "take_profit": 2617.8434,
             "timestamp": "2026-09-21 00:54:46 UTC",
@@ -45,7 +45,7 @@
             "label": "Bitcoin",
             "side": "SHORT",
             "entry_price": 85311.98,
-            "precio_actual": 85311.98,
+            "precio_actual": 85913.03,
             "stop_loss": 86444.9139,
             "take_profit": 82819.5254,
             "timestamp": "2026-09-21 12:39:57 UTC",
@@ -60,7 +60,7 @@
             "label": "Solana",
             "side": "SHORT",
             "entry_price": 116.73,
-            "precio_actual": 116.73,
+            "precio_actual": 117.39,
             "stop_loss": 119.0346,
             "take_profit": 111.6598,
             "timestamp": "2026-09-21 12:39:57 UTC",
@@ -75,7 +75,7 @@
             "label": "Ripple",
             "side": "SHORT",
             "entry_price": 1.4935,
-            "precio_actual": 1.4935,
+            "precio_actual": 1.5088,
             "stop_loss": 1.5227,
             "take_profit": 1.4292,
             "timestamp": "2026-09-21 12:39:57 UTC",
@@ -86,15 +86,9 @@
         }
     ],
     "capital_libre": 3099.51,
-    "last_update": "2026-09-21 12:39:57 UTC",
+    "last_update": "2026-09-21 18:32:30 UTC",
     "macro_status": "BULLISH_TREND_CRYPTO",
     "decisiones_log": [
-        "⚡ G-CORE NEXUS SHORT V4.3 // MACRO BTC: BULLISH_TREND_CRYPTO | Risk Factor: 50% ($24.75)",
-        "❌ SL CERRADO en SHORT BTC | PnL: $-24.75",
-        "❌ SL CERRADO en SHORT SOL | PnL: $-24.75",
-        "❌ SL CERRADO en SHORT XRP | PnL: $-24.75",
-        "🚀 SHORT ENTRY: BTC a $85311.9800 | SL: $86444.9139 | TP: $82819.5254",
-        "🚀 SHORT ENTRY: SOL a $116.7300 | SL: $119.0346 | TP: $111.6598",
-        "🚀 SHORT ENTRY: XRP a $1.4935 | SL: $1.5227 | TP: $1.4292"
+        "⚡ G-CORE NEXUS SHORT V4.3 // MACRO BTC: BULLISH_TREND_CRYPTO | Risk Factor: 50% ($24.75)"
     ]
 }
