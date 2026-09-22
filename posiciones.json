@@ -30,7 +30,7 @@
             "label": "Bitcoin",
             "side": "SHORT",
             "entry_price": 85311.98,
-            "precio_actual": 85213.86,
+            "precio_actual": 86123.23,
             "stop_loss": 86444.9139,
             "take_profit": 82819.5254,
             "timestamp": "2026-09-21 12:39:57 UTC",
@@ -45,8 +45,8 @@
             "label": "Ethereum",
             "side": "SHORT",
             "entry_price": 2771.13,
-            "precio_actual": 2725.49,
-            "stop_loss": 2771.13,
+            "precio_actual": 2760.83,
+            "stop_loss": 2826.5526,
             "take_profit": 2676.8608,
             "timestamp": "2026-09-21 22:30:23 UTC",
             "allocated_capital": 825.0,
@@ -60,7 +60,7 @@
             "label": "Solana",
             "side": "SHORT",
             "entry_price": 119.4,
-            "precio_actual": 116.39,
+            "precio_actual": 117.72,
             "stop_loss": 119.4,
             "take_profit": 114.7871,
             "timestamp": "2026-09-21 22:30:23 UTC",
@@ -75,8 +75,8 @@
             "label": "Ripple",
             "side": "SHORT",
             "entry_price": 1.5475,
-            "precio_actual": 1.5147,
-            "stop_loss": 1.5475,
+            "precio_actual": 1.5421,
+            "stop_loss": 1.5785,
             "take_profit": 1.4705,
             "timestamp": "2026-09-21 22:30:23 UTC",
             "allocated_capital": 825.0,
@@ -86,12 +86,10 @@
         }
     ],
     "capital_libre": 3025.26,
-    "last_update": "2026-09-22 07:28:19 UTC",
-    "macro_status": "WEAK_BEARISH_CRYPTO",
+    "last_update": "2026-09-22 13:12:12 UTC",
+    "macro_status": "BULLISH_TREND_CRYPTO",
     "decisiones_log": [
-        "⚡ G-CORE NEXUS SHORT V4.3 // MACRO BTC: WEAK_BEARISH_CRYPTO | Risk Factor: 75% ($37.12)",
-        "🛡️ Break-Even activado para SHORT ETH a $2771.1300",
-        "🛡️ Break-Even activado para SHORT SOL a $119.4000",
-        "🛡️ Break-Even activado para SHORT XRP a $1.5475"
+        "⚡ G-CORE NEXUS SHORT V4.3 // MACRO BTC: BULLISH_TREND_CRYPTO | Risk Factor: 50% ($24.75)",
+        "🛡️ Break-Even activado para SHORT SOL a $119.4000"
     ]
 }
