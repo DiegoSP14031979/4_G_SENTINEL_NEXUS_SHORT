@@ -30,7 +30,7 @@
             "label": "Ethereum",
             "side": "SHORT",
             "entry_price": 2771.13,
-            "precio_actual": 2755.9,
+            "precio_actual": 2751.13,
             "stop_loss": 2826.5526,
             "take_profit": 2676.8608,
             "timestamp": "2026-09-21 22:30:23 UTC",
@@ -45,7 +45,7 @@
             "label": "Solana",
             "side": "SHORT",
             "entry_price": 119.4,
-            "precio_actual": 117.98,
+            "precio_actual": 118.08,
             "stop_loss": 119.4,
             "take_profit": 114.7871,
             "timestamp": "2026-09-21 22:30:23 UTC",
@@ -60,7 +60,7 @@
             "label": "Ripple",
             "side": "SHORT",
             "entry_price": 1.5475,
-            "precio_actual": 1.5711,
+            "precio_actual": 1.5779,
             "stop_loss": 1.5785,
             "take_profit": 1.4705,
             "timestamp": "2026-09-21 22:30:23 UTC",
@@ -75,7 +75,7 @@
             "label": "Bitcoin",
             "side": "SHORT",
             "entry_price": 86548.59,
-            "precio_actual": 86548.59,
+            "precio_actual": 86249.95,
             "stop_loss": 87395.5457,
             "take_profit": 84685.2874,
             "timestamp": "2026-09-22 17:59:34 UTC",
@@ -86,12 +86,10 @@
         }
     ],
     "capital_libre": 3000.51,
-    "last_update": "2026-09-22 17:59:34 UTC",
+    "last_update": "2026-09-22 21:12:46 UTC",
     "macro_status": "BULLISH_TREND_CRYPTO",
     "decisiones_log": [
         "⚡ G-CORE NEXUS SHORT V4.3 // MACRO BTC: BULLISH_TREND_CRYPTO | Risk Factor: 50% ($24.75)",
-        "❌ SL CERRADO en SHORT BTC | PnL: $-24.75",
-        "🛡️ Break-Even activado para SHORT SOL a $119.4000",
-        "🚀 SHORT ENTRY: BTC a $86548.5900 | SL: $87395.5457 | TP: $84685.2874"
+        "🛡️ Break-Even activado para SHORT SOL a $119.4000"
     ]
 }
