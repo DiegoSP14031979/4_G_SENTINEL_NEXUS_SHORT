@@ -468,6 +468,27 @@
             "side": "SHORT",
             "pnl_usd": -24.75,
             "reason": "STOP_LOSS"
+        },
+        {
+            "timestamp": "2026-09-23 16:22:59 UTC",
+            "symbol": "ETH",
+            "side": "SHORT",
+            "pnl_usd": 54.45,
+            "reason": "TAKE_PROFIT"
+        },
+        {
+            "timestamp": "2026-09-23 16:22:59 UTC",
+            "symbol": "BTC",
+            "side": "SHORT",
+            "pnl_usd": 54.45,
+            "reason": "TAKE_PROFIT"
+        },
+        {
+            "timestamp": "2026-09-23 16:22:59 UTC",
+            "symbol": "XRP",
+            "side": "SHORT",
+            "pnl_usd": 54.45,
+            "reason": "TAKE_PROFIT"
         }
     ],
     "metricas": {
