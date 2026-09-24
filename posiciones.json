@@ -30,7 +30,7 @@
             "label": "Bitcoin",
             "side": "SHORT",
             "entry_price": 84220.29,
-            "precio_actual": 84531.31,
+            "precio_actual": 84478.23,
             "stop_loss": 85220.6839,
             "take_profit": 82019.4234,
             "timestamp": "2026-09-23 16:22:59 UTC",
@@ -45,7 +45,7 @@
             "label": "Ethereum",
             "side": "SHORT",
             "entry_price": 2662.4,
-            "precio_actual": 2684.54,
+            "precio_actual": 2688.81,
             "stop_loss": 2699.7446,
             "take_profit": 2580.2418,
             "timestamp": "2026-09-23 16:22:59 UTC",
@@ -60,7 +60,7 @@
             "label": "Ripple",
             "side": "SHORT",
             "entry_price": 1.5066,
-            "precio_actual": 1.519,
+            "precio_actual": 1.5333,
             "stop_loss": 1.5367,
             "take_profit": 1.3896,
             "timestamp": "2026-09-23 16:22:59 UTC",
@@ -68,27 +68,13 @@
             "risk_allocated": 37.12,
             "trigger_type": "LOCAL_WEAKNESS",
             "rsi": 29.5
-        },
-        {
-            "pair": "SOL-USD",
-            "symbol": "SOL",
-            "label": "Solana",
-            "side": "SHORT",
-            "entry_price": 114.63,
-            "precio_actual": 115.8,
-            "stop_loss": 116.7418,
-            "take_profit": 109.9841,
-            "timestamp": "2026-09-23 20:00:22 UTC",
-            "allocated_capital": 825.0,
-            "risk_allocated": 37.12,
-            "trigger_type": "BREAKOUT_BEARISH",
-            "rsi": 24.3
         }
     ],
-    "capital_libre": 3193.56,
-    "last_update": "2026-09-24 14:41:54 UTC",
+    "capital_libre": 3156.44,
+    "last_update": "2026-09-24 18:52:03 UTC",
     "macro_status": "WEAK_BEARISH_CRYPTO",
     "decisiones_log": [
-        "⚡ G-CORE NEXUS SHORT V4.3 // MACRO BTC: WEAK_BEARISH_CRYPTO | Risk Factor: 75% ($37.12)"
+        "⚡ G-CORE NEXUS SHORT V4.3 // MACRO BTC: WEAK_BEARISH_CRYPTO | Risk Factor: 75% ($37.12)",
+        "❌ SL CERRADO en SHORT SOL | PnL: $-37.12"
     ]
 }
