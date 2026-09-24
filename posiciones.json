@@ -30,7 +30,7 @@
             "label": "Bitcoin",
             "side": "SHORT",
             "entry_price": 84220.29,
-            "precio_actual": 84478.23,
+            "precio_actual": 84241.35,
             "stop_loss": 85220.6839,
             "take_profit": 82019.4234,
             "timestamp": "2026-09-23 16:22:59 UTC",
@@ -45,7 +45,7 @@
             "label": "Ethereum",
             "side": "SHORT",
             "entry_price": 2662.4,
-            "precio_actual": 2688.81,
+            "precio_actual": 2685.25,
             "stop_loss": 2699.7446,
             "take_profit": 2580.2418,
             "timestamp": "2026-09-23 16:22:59 UTC",
@@ -55,26 +55,43 @@
             "rsi": 17.8
         },
         {
+            "pair": "SOL-USD",
+            "symbol": "SOL",
+            "label": "Solana",
+            "side": "SHORT",
+            "entry_price": 116.87,
+            "precio_actual": 116.87,
+            "stop_loss": 118.67,
+            "take_profit": 112.91,
+            "timestamp": "2026-09-24 22:05:44 UTC",
+            "allocated_capital": 825.0,
+            "risk_allocated": 37.12,
+            "trigger_type": "EXHAUSTION_REVERSAL",
+            "rsi": 68.9
+        },
+        {
             "pair": "XRP-USD",
             "symbol": "XRP",
             "label": "Ripple",
             "side": "SHORT",
-            "entry_price": 1.5066,
-            "precio_actual": 1.5333,
-            "stop_loss": 1.5367,
-            "take_profit": 1.3896,
-            "timestamp": "2026-09-23 16:22:59 UTC",
+            "entry_price": 1.541,
+            "precio_actual": 1.541,
+            "stop_loss": 1.5737,
+            "take_profit": 1.4691,
+            "timestamp": "2026-09-24 22:05:44 UTC",
             "allocated_capital": 825.0,
             "risk_allocated": 37.12,
-            "trigger_type": "LOCAL_WEAKNESS",
-            "rsi": 29.5
+            "trigger_type": "EXHAUSTION_REVERSAL",
+            "rsi": 70.2
         }
     ],
-    "capital_libre": 3156.44,
-    "last_update": "2026-09-24 18:52:03 UTC",
+    "capital_libre": 3119.32,
+    "last_update": "2026-09-24 22:05:44 UTC",
     "macro_status": "WEAK_BEARISH_CRYPTO",
     "decisiones_log": [
         "⚡ G-CORE NEXUS SHORT V4.3 // MACRO BTC: WEAK_BEARISH_CRYPTO | Risk Factor: 75% ($37.12)",
-        "❌ SL CERRADO en SHORT SOL | PnL: $-37.12"
+        "❌ SL CERRADO en SHORT XRP | PnL: $-37.12",
+        "🚀 SHORT ENTRY: SOL a $116.8700 | SL: $118.6700 | TP: $112.9100",
+        "🚀 SHORT ENTRY: XRP a $1.5410 | SL: $1.5737 | TP: $1.4691"
     ]
 }
