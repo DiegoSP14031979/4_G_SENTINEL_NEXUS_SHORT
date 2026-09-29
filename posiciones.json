@@ -30,8 +30,8 @@
             "label": "Bitcoin",
             "side": "SHORT",
             "entry_price": 84220.29,
-            "precio_actual": 83933.51,
-            "stop_loss": 85904.6958,
+            "precio_actual": 82986.99,
+            "stop_loss": 84220.29,
             "take_profit": 82019.4234,
             "timestamp": "2026-09-23 16:22:59 UTC",
             "allocated_capital": 825.0,
@@ -45,7 +45,7 @@
             "label": "Solana",
             "side": "SHORT",
             "entry_price": 118.13,
-            "precio_actual": 119.46,
+            "precio_actual": 118.16,
             "stop_loss": 120.4926,
             "take_profit": 114.0899,
             "timestamp": "2026-09-28 15:05:03 UTC",
@@ -60,7 +60,7 @@
             "label": "Dogecoin",
             "side": "SHORT",
             "entry_price": 0.0934,
-            "precio_actual": 0.0951,
+            "precio_actual": 0.0934,
             "stop_loss": 0.0953,
             "take_profit": 0.089,
             "timestamp": "2026-09-28 21:40:13 UTC",
@@ -68,13 +68,29 @@
             "risk_allocated": 49.5,
             "trigger_type": "BREAKOUT_BEARISH",
             "rsi": 54.2
+        },
+        {
+            "pair": "ETH-USD",
+            "symbol": "ETH",
+            "label": "Ethereum",
+            "side": "SHORT",
+            "entry_price": 2672.87,
+            "precio_actual": 2672.87,
+            "stop_loss": 2705.3396,
+            "take_profit": 2601.4368,
+            "timestamp": "2026-09-29 15:28:50 UTC",
+            "allocated_capital": 825.0,
+            "risk_allocated": 49.5,
+            "trigger_type": "LOCAL_WEAKNESS",
+            "rsi": 52.7
         }
     ],
     "capital_libre": 3240.61,
-    "last_update": "2026-09-29 08:03:04 UTC",
-    "macro_status": "BULLISH_TREND_CRYPTO",
+    "last_update": "2026-09-29 15:28:50 UTC",
+    "macro_status": "STRONG_BEARISH_CRYPTO",
     "decisiones_log": [
-        "⚡ G-CORE NEXUS SHORT V4.3 // MACRO BTC: BULLISH_TREND_CRYPTO | Risk Factor: 50% ($24.75)",
-        "❌ SL CERRADO en SHORT XRP | PnL: $-49.50"
+        "⚡ G-CORE NEXUS SHORT V4.3 // MACRO BTC: STRONG_BEARISH_CRYPTO | Risk Factor: 100% ($49.50)",
+        "🛡️ Break-Even activado para SHORT BTC a $84220.2900",
+        "🚀 SHORT ENTRY: ETH a $2672.8700 | SL: $2705.3396 | TP: $2601.4368"
     ]
 }
