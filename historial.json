@@ -580,6 +580,27 @@
             "side": "SHORT",
             "pnl_usd": -49.5,
             "reason": "STOP_LOSS"
+        },
+        {
+            "timestamp": "2026-09-30 13:24:59 UTC",
+            "symbol": "SOL",
+            "side": "SHORT",
+            "pnl_usd": -49.5,
+            "reason": "STOP_LOSS"
+        },
+        {
+            "timestamp": "2026-09-30 13:24:59 UTC",
+            "symbol": "DOGE",
+            "side": "SHORT",
+            "pnl_usd": -49.5,
+            "reason": "STOP_LOSS"
+        },
+        {
+            "timestamp": "2026-09-30 13:24:59 UTC",
+            "symbol": "ETH",
+            "side": "SHORT",
+            "pnl_usd": -49.5,
+            "reason": "STOP_LOSS"
         }
     ],
     "metricas": {
