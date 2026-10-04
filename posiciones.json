@@ -30,7 +30,7 @@
             "label": "Bitcoin",
             "side": "SHORT",
             "entry_price": 84514.56,
-            "precio_actual": 84738.15,
+            "precio_actual": 84802.98,
             "stop_loss": 85444.8311,
             "take_profit": 82467.9636,
             "timestamp": "2026-10-02 20:27:52 UTC",
@@ -45,7 +45,7 @@
             "label": "Ethereum",
             "side": "SHORT",
             "entry_price": 2668.47,
-            "precio_actual": 2687.42,
+            "precio_actual": 2691.32,
             "stop_loss": 2702.7804,
             "take_profit": 2592.9872,
             "timestamp": "2026-10-02 20:27:52 UTC",
@@ -60,7 +60,7 @@
             "label": "Ripple",
             "side": "SHORT",
             "entry_price": 1.475,
-            "precio_actual": 1.486,
+            "precio_actual": 1.4906,
             "stop_loss": 1.5049,
             "take_profit": 1.4091,
             "timestamp": "2026-10-02 20:27:52 UTC",
@@ -75,7 +75,7 @@
             "label": "Dogecoin",
             "side": "SHORT",
             "entry_price": 0.0929,
-            "precio_actual": 0.0929,
+            "precio_actual": 0.0927,
             "stop_loss": 0.0934,
             "take_profit": 0.0918,
             "timestamp": "2026-10-03 23:35:20 UTC",
@@ -86,10 +86,9 @@
         }
     ],
     "capital_libre": 3270.33,
-    "last_update": "2026-10-03 23:35:20 UTC",
-    "macro_status": "WEAK_BEARISH_CRYPTO",
+    "last_update": "2026-10-04 04:55:36 UTC",
+    "macro_status": "BULLISH_TREND_CRYPTO",
     "decisiones_log": [
-        "⚡ G-CORE NEXUS SHORT V4.3 // MACRO BTC: WEAK_BEARISH_CRYPTO | Risk Factor: 75% ($37.12)",
-        "🚀 SHORT ENTRY: DOGE a $0.0929 | SL: $0.0934 | TP: $0.0918"
+        "⚡ G-CORE NEXUS SHORT V4.3 // MACRO BTC: BULLISH_TREND_CRYPTO | Risk Factor: 50% ($24.75)"
     ]
 }
