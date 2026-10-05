@@ -713,6 +713,13 @@
             "side": "SHORT",
             "pnl_usd": -24.75,
             "reason": "STOP_LOSS"
+        },
+        {
+            "timestamp": "2026-10-05 01:43:34 UTC",
+            "symbol": "BTC",
+            "side": "SHORT",
+            "pnl_usd": -24.75,
+            "reason": "STOP_LOSS"
         }
     ],
     "metricas": {
