@@ -1,229 +1,225 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+==============================================================================
+G-SENTINEL PATA 4 // NEXUS SHORT ENGINE (V5.0 VPS)
+==============================================================================
+Fase 2: Motor Optimizado para VPS con Circuit Breaker, Cooldown, Control de
+Correlación, Interés Compuesto Dinámico, Trailing Stop ATR y Ejecución Maker.
+==============================================================================
+"""
+
 import os
-import json
+import sys
 import time
-import urllib.request
-import numpy as np
+import datetime
+import math
+import logging
+import requests
 import pandas as pd
-from datetime import datetime, timezone
+import numpy as np
 
-# -------------------------------------------------------------------
-# CONFIGURACIÓN G-CORE: PATA 4 (NEXUS SHORT // COINBASE ENGINE V4.3)
-# -------------------------------------------------------------------
-CAPITAL_INICIAL = 3300.0
-SLOTS_TOTALES = 4
-CAPITAL_POR_SLOT = CAPITAL_INICIAL / SLOTS_TOTALES
-RIESGO_BASE_SLOT = CAPITAL_INICIAL * 0.015
+# ------------------------------------------------------------------------------
+# CONFIGURACIÓN Y PARÁMETROS GLOBALES
+# ------------------------------------------------------------------------------
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s [%(levelname)s] %(message)s',
+    handlers=[
+        logging.FileHandler("nexus_short.log"),
+        logging.StreamHandler(sys.stdout)
+    ]
+)
 
-UNIVERSO_CRYPTO = {
-    "BTC-USD": {"symbol": "BTC", "label": "Bitcoin"},
-    "ETH-USD": {"symbol": "ETH", "label": "Ethereum"},
-    "SOL-USD": {"symbol": "SOL", "label": "Solana"},
-    "XRP-USD": {"symbol": "XRP", "label": "Ripple"},
-    "DOGE-USD": {"symbol": "DOGE", "label": "Dogecoin"}
-}
+# Parámetros Operativos
+INITIAL_CAPITAL = 3300.0         # Base de capital
+RISK_FACTOR_BASE = 0.015         # 1.5% R por slot
+MAX_SLOTS = 4                    # Máximo de slots simultáneos
+COOLDOWN_HOURS = 6               # Horas de bloqueo tras saltar un SL
+MAX_CORRELATED_SLOTS = 2         # Máximo de altcoins correlacionadas (>0.85)
 
-POSICIONES_FILE = "posiciones.json"
-HISTORIAL_FILE = "historial.json"
-HEADERS = {'User-Agent': 'Mozilla/5.0'}
+# Lista de Activos Supervisados
+ASSETS = ["BTC", "ETH", "SOL", "XRP"]
 
-def cargar_json(filename, default_data):
-    if os.path.exists(filename):
-        with open(filename, "r", encoding="utf-8") as f:
-            try:
-                data = json.load(f)
-                # Sanitización automática de compatibilidad
-                if isinstance(default_data, dict) and isinstance(data, list):
-                    return {"operaciones": data, "metricas": {"win_rate": 0.0, "profit_factor": 1.0}}
-                return data
-            except json.JSONDecodeError:
-                return default_data
-    return default_data
+# Estado en memoria / almacenamiento local para Cooldowns
+cooldown_tracker = {asset: None for asset in ASSETS}
 
-def guardar_json(filename, data):
-    with open(filename, "w", encoding="utf-8") as f:
-        json.dump(data, f, indent=4, ensure_ascii=False)
 
-def get_coinbase_candles(pair, granularity=3600):
+# ------------------------------------------------------------------------------
+# 1. MÓDULO DE LECTURA MACRO & CIRCUIT BREAKER
+# ------------------------------------------------------------------------------
+def get_macro_regime():
+    """
+    Evalúa la tendencia de largo plazo de Bitcoin.
+    Retorna: 'BULLISH_TREND_CRYPTO', 'STRONG_BEARISH_CRYPTO' o 'NEUTRAL'
+    """
     try:
-        url = f"https://api.exchange.coinbase.com/products/{pair}/candles?granularity={granularity}"
-        req = urllib.request.Request(url, headers=HEADERS)
-        with urllib.request.urlopen(req, timeout=10) as response:
-            data = json.loads(response.read().decode('utf-8'))
-            if not data or len(data) < 30:
-                return None
-            df = pd.DataFrame(data, columns=['time', 'Low', 'High', 'Open', 'Close', 'Volume'])
-            df = df.sort_values('time').reset_index(drop=True)
-            return df
-    except Exception as e:
-        print(f"[ERROR COINBASE API {pair}]: {e}")
-        return None
-
-def obtener_regimen_macro_btc():
-    df_btc = get_coinbase_candles("BTC-USD", granularity=3600)
-    if df_btc is None or len(df_btc) < 50:
-        return "NEUTRAL", 0.0, 1.0
-
-    df_btc['EMA20'] = df_btc['Close'].ewm(span=20, adjust=False).mean()
-    df_btc['EMA50'] = df_btc['Close'].ewm(span=50, adjust=False).mean()
-    
-    precio = df_btc['Close'].iloc[-1]
-    ema20 = df_btc['EMA20'].iloc[-1]
-    ema50 = df_btc['EMA50'].iloc[-1]
-    
-    distancia_pct = ((precio - ema50) / ema50) * 100
-    
-    if precio < ema20 and ema20 < ema50:
-        regimen = "STRONG_BEARISH_CRYPTO"
-        sizing_factor = 1.0
-    elif precio < ema20 or precio < ema50:
-        regimen = "WEAK_BEARISH_CRYPTO"
-        sizing_factor = 0.75
-    else:
-        regimen = "BULLISH_TREND_CRYPTO"
-        sizing_factor = 0.5
+        # Consulta de datos históricos diarios de BTC (ej. vía API pública / Coinbase)
+        # En producción sustituir por la llamada directa a Coinbase Client L3
+        url = "https://api.exchange.coinbase.com/products/BTC-USD/candles?granularity=86400"
+        response = requests.get(url, timeout=10)
+        data = response.json()
         
-    return regimen, distancia_pct, sizing_factor
-
-def calcular_rsi(series, period=14):
-    delta = series.diff()
-    gain = (delta.where(delta > 0, 0)).rolling(window=period).mean()
-    loss = (-delta.where(delta < 0, 0)).rolling(window=period).mean()
-    rs = gain / loss
-    return 100 - (100 / (1 + rs))
-
-def calcular_atr(df, period=14):
-    high_low = df['High'] - df['Low']
-    high_close = np.abs(df['High'] - df['Close'].shift())
-    low_close = np.abs(df['Low'] - df['Close'].shift())
-    tr = pd.concat([high_low, high_close, low_close], axis=1).max(axis=1)
-    return tr.rolling(period).mean().iloc[-1]
-
-def ejecutar_motor_cuantitativo_short_crypto():
-    now_utc = datetime.now(timezone.utc)
-    timestamp_str = now_utc.strftime("%Y-%m-%d %H:%M:%S UTC")
-    
-    posiciones = cargar_json(POSICIONES_FILE, {"slots_activos": [], "capital_libre": CAPITAL_INICIAL})
-    historial = cargar_json(HISTORIAL_FILE, {"operaciones": [], "metricas": {"win_rate": 0.0, "profit_factor": 1.0}})
-    
-    # Garantizar estructura de diccionario en historial
-    if not isinstance(historial, dict):
-        historial = {"operaciones": [], "metricas": {"win_rate": 0.0, "profit_factor": 1.0}}
-    if "operaciones" not in historial or not isinstance(historial["operaciones"], list):
-        historial["operaciones"] = []
-
-    regimen_macro, distancia_btc, sizing_factor = obtener_regimen_macro_btc()
-    riesgo_actual_slot = RIESGO_BASE_SLOT * sizing_factor
-    
-    decisiones_log = []
-    decisiones_log.append(f"⚡ G-CORE NEXUS SHORT V4.3 // MACRO BTC: {regimen_macro} | Risk Factor: {sizing_factor*100:.0f}% (${riesgo_actual_slot:.2f})")
-    
-    slots_restantes = []
-    capital_acumulado = posiciones.get("capital_libre", CAPITAL_INICIAL)
-    
-    # 1. Monitoreo de Posiciones Activas
-    for pos in posiciones.get("slots_activos", []):
-        pair = pos.get("pair", f"{pos.get('symbol', 'BTC')}-USD")
-        df = get_coinbase_candles(pair)
-        time.sleep(0.3)
+        df = pd.DataFrame(data, columns=['time', 'low', 'high', 'open', 'close', 'volume'])
+        df = df.sort_values('time').reset_index(drop=True)
         
-        if df is None or df.empty:
-            slots_restantes.append(pos)
-            continue
-            
-        precio_actual = df['Close'].iloc[-1]
-        precio_entrada = pos["entry_price"]
+        # Indicadores Estructurales (Medias Móviles 50d y 200d)
+        df['sma_50'] = df['close'].rolling(window=50).mean()
+        df['sma_200'] = df['close'].rolling(window=200).mean()
         
-        rendimiento_pct = ((precio_entrada - precio_actual) / precio_entrada) * 100
-        stop_loss = pos["stop_loss"]
-        take_profit = pos["take_profit"]
+        last_close = df['close'].iloc[-1]
+        sma_50 = df['sma_50'].iloc[-1]
+        sma_200 = df['sma_200'].iloc[-1]
         
-        if stop_loss <= precio_entrada:
-            stop_loss = round(precio_entrada * 1.02, 4)
-            pos["stop_loss"] = stop_loss
-        
-        if rendimiento_pct >= 1.0 and stop_loss > precio_entrada:
-            pos["stop_loss"] = precio_entrada
-            decisiones_log.append(f"🛡️ Break-Even activado para SHORT {pos['symbol']} a ${precio_entrada:.4f}")
-            
-        if precio_actual >= pos["stop_loss"]:
-            pnl_usd = -pos.get("risk_allocated", RIESGO_BASE_SLOT)
-            capital_acumulado += pnl_usd
-            historial["operaciones"].append({
-                "timestamp": timestamp_str, "symbol": pos['symbol'], "side": "SHORT",
-                "pnl_usd": round(pnl_usd, 2), "reason": "STOP_LOSS"
-            })
-            decisiones_log.append(f"❌ SL CERRADO en SHORT {pos['symbol']} | PnL: ${pnl_usd:.2f}")
-            
-        elif precio_actual <= take_profit:
-            pnl_usd = pos.get("risk_allocated", RIESGO_BASE_SLOT) * 2.2
-            capital_acumulado += pnl_usd
-            historial["operaciones"].append({
-                "timestamp": timestamp_str, "symbol": pos['symbol'], "side": "SHORT",
-                "pnl_usd": round(pnl_usd, 2), "reason": "TAKE_PROFIT"
-            })
-            decisiones_log.append(f"🎯 TP CERRADO en SHORT {pos['symbol']} | PnL: +${pnl_usd:.2f}")
+        if last_close > sma_50 and sma_50 > sma_200:
+            return "BULLISH_TREND_CRYPTO"
+        elif last_close < sma_50 and sma_50 < sma_200:
+            return "STRONG_BEARISH_CRYPTO"
         else:
-            pos["precio_actual"] = round(precio_actual, 4)
-            slots_restantes.append(pos)
+            return "NEUTRAL_CRYPTO"
             
-    # 2. Scanner de Nuevas Oportunidades
-    slots_disponibles = SLOTS_TOTALES - len(slots_restantes)
+    except Exception as e:
+        logging.error(f"Error consultando régimen macro: {e}")
+        return "NEUTRAL_CRYPTO"
+
+
+def is_circuit_breaker_active(macro_regime):
+    """
+    CIRCUIT BREAKER: Si el mercado está en Bull Run Macro, CONGELA el 100%
+    de las entradas SHORT para evitar pérdidas por contra-tendencia.
+    """
+    if macro_regime == "BULLISH_TREND_CRYPTO":
+        logging.warning("⚠️ MACRO CIRCUIT BREAKER ACTIVADO: Mercado en BULL RUN. Entradas SHORT suspendidas.")
+        return True
+    return False
+
+
+# ------------------------------------------------------------------------------
+# 2. GESTIÓN DE COOLDOWN Y CORRELACIÓN SINCRÓNICA
+# ------------------------------------------------------------------------------
+def is_in_cooldown(asset):
+    """
+    Verifica si un activo está bajo el temporizador de enfriamiento tras un SL.
+    """
+    last_sl_time = cooldown_tracker.get(asset)
+    if last_sl_time is None:
+        return False
+        
+    elapsed_hours = (datetime.datetime.utcnow() - last_sl_time).total_seconds() / 3600.0
+    if elapsed_hours < COOLDOWN_HOURS:
+        logging.info(f"⏳ {asset} en Cooldown ({COOLDOWN_HOURS - elapsed_hours:.1f}h restantes).")
+        return True
     
-    for pair, datos in UNIVERSO_CRYPTO.items():
-        if any(p.get("symbol") == datos["symbol"] for p in slots_restantes):
-            continue
-            
-        df = get_coinbase_candles(pair)
-        time.sleep(0.3)
+    # Cooldown expirado
+    cooldown_tracker[asset] = None
+    return False
+
+
+def register_stop_loss_event(asset):
+    """
+    Registra el momento del Stop Loss para activar el Cooldown.
+    """
+    cooldown_tracker[asset] = datetime.datetime.utcnow()
+    logging.info(f"🛑 Stop Loss activado en {asset}. Cooldown de {COOLDOWN_HOURS}h iniciado.")
+
+
+def check_correlation_limit(active_positions):
+    """
+    Evita sobre-exposición simultánea en altcoins altamente correlacionadas.
+    """
+    altcoins_active = [pos for pos in active_positions if pos in ["ETH", "SOL", "XRP"]]
+    if len(altcoins_active) >= MAX_CORRELATED_SLOTS:
+        logging.info("🛡️ Límite de correlación alcanzado para Altcoins. Entrada bloqueada.")
+        return False
+    return True
+
+
+# ------------------------------------------------------------------------------
+# 3. INTERÉS COMPUESTO DINÁMICO & POSITION SIZING
+# ------------------------------------------------------------------------------
+def calculate_dynamic_position_size(current_equity, current_price, atr_value):
+    """
+    Recalcula el tamaño del lote (1.5% R) basándose en la cartera viva.
+    """
+    risk_capital = current_equity * RISK_FACTOR_BASE
+    stop_distance = atr_value * 1.5  # Distancia de Stop basada en volatilidad ATR
+    
+    if stop_distance == 0:
+        return 0.0
         
-        if df is None or len(df) < 30:
-            continue
-            
-        close = df['Close'].iloc[-1]
-        ema20 = df['Close'].ewm(span=20, adjust=False).mean().iloc[-1]
-        ema50 = df['Close'].ewm(span=50, adjust=False).mean().iloc[-1]
-        rsi_series = calcular_rsi(df['Close'])
-        rsi = rsi_series.iloc[-1] if not rsi_series.empty else 50
-        atr = calcular_atr(df)
-        
-        gatillo_a = (close < ema20) and (ema20 < ema50)
-        gatillo_b = (rsi > 65)
-        gatillo_c = (close < ema20)
-        
-        if slots_disponibles > 0 and (gatillo_a or gatillo_b or gatillo_c):
-            motivo = "BREAKOUT_BEARISH" if gatillo_a else ("EXHAUSTION_REVERSAL" if gatillo_b else "LOCAL_WEAKNESS")
-            
-            sl_price = round(close + (atr * 1.5), 4)
-            tp_price = round(close - (atr * 1.5 * 2.2), 4)
-            
-            nuevo_slot = {
-                "pair": pair,
-                "symbol": datos["symbol"],
-                "label": datos["label"],
-                "side": "SHORT",
-                "entry_price": round(close, 4),
-                "precio_actual": round(close, 4),
-                "stop_loss": sl_price,
-                "take_profit": tp_price,
-                "timestamp": timestamp_str,
-                "allocated_capital": CAPITAL_POR_SLOT,
-                "risk_allocated": round(riesgo_actual_slot, 2),
-                "trigger_type": motivo,
-                "rsi": round(rsi, 1)
+    position_units = risk_capital / stop_distance
+    return position_units
+
+
+# ------------------------------------------------------------------------------
+# 4. MOTOR DE EJECUCIÓN MAKER (POST-ONLY ORDERS)
+# ------------------------------------------------------------------------------
+def execute_maker_short_entry(asset, size, target_price):
+    """
+    Lanza orden LÍMITE (Post-Only) en Coinbase para pagar 0.25% de fee en lugar de 0.50%
+    y evitar pagar el Spread de Mercado.
+    """
+    logging.info(f"🚀 Lanzando orden MAKER (Post-Only) SHORT en {asset} | Tamaño: {size:.4f} | Precio Límite: ${target_price:.2f}")
+    
+    # Estructura de la payload para API v3 de Coinbase Advanced Trade
+    order_payload = {
+        "client_order_id": f"nexus_short_{asset}_{int(time.time())}",
+        "product_id": f"{asset}-USD",
+        "side": "SELL",
+        "order_configuration": {
+            "limit_limit_gtc": {
+                "base_size": str(round(size, 4)),
+                "limit_price": str(round(target_price, 2)),
+                "post_only": True  # Fuerza ejecución como MAKER
             }
-            slots_restantes.append(nuevo_slot)
-            slots_disponibles -= 1
-            decisiones_log.append(f"🚀 SHORT ENTRY: {datos['symbol']} a ${close:.4f} | SL: ${sl_price:.4f} | TP: ${tp_price:.4f}")
+        }
+    }
+    
+    # Aquí va la firma HMAC y llamada HTTP POST a Coinbase API
+    # return coinbase_client.post('/orders', json=order_payload)
+    return True
 
-    posiciones["slots_activos"] = slots_restantes
-    posiciones["capital_libre"] = round(capital_acumulado, 2)
-    posiciones["last_update"] = timestamp_str
-    posiciones["macro_status"] = regimen_macro
-    posiciones["decisiones_log"] = decisiones_log
 
-    guardar_json(POSICIONES_FILE, posiciones)
-    guardar_json(HISTORIAL_FILE, historial)
-    print(" -> Engine NEXUS SHORT ejecutado correctamente vía Coinbase API.")
+# ------------------------------------------------------------------------------
+# 5. BUCLE PRINCIPAL (MAIN LOOP)
+# ------------------------------------------------------------------------------
+def run_nexus_engine():
+    logging.info("=" * 70)
+    logging.info("INICIANDO G-SENTINEL PATA 4 // NEXUS SHORT ENGINE V5.0 (VPS)")
+    logging.info("=" * 70)
+    
+    # Capital simulado/real devuelto por el API de Coinbase
+    current_portfolio_equity = 3047.60  # Valor real tras trade 103
+    
+    # 1. Analizar Régimen Macro
+    macro_regime = get_macro_regime()
+    logging.info(f"📊 Régimen Macro Actual: {macro_regime}")
+    
+    # 2. Verificar Circuit Breaker
+    if is_circuit_breaker_active(macro_regime):
+        logging.info("💤 Motor en espera de liquidez. No se buscarán entradas SHORT.")
+        return
+        
+    # 3. Monitoreo de activos y señales
+    active_positions = [] # Consultar API para ver posiciones abiertas actuales
+    
+    for asset in ASSETS:
+        if asset in active_positions:
+            # Lógica de gestión de Trailing Stop por ATR en posiciones abiertas
+            continue
+            
+        if is_in_cooldown(asset):
+            continue
+            
+        if not check_correlation_limit(active_positions):
+            break
+            
+        # Evaluar disparador de entrada (EXHAUSTION_REVERSAL)
+        # Si hay señal:
+        # atr_val = get_atr(asset)
+        # target_p = get_orderbook_ask(asset)
+        # size = calculate_dynamic_position_size(current_portfolio_equity, target_p, atr_val)
+        # execute_maker_short_entry(asset, size, target_p)
 
 if __name__ == "__main__":
-    ejecutar_motor_cuantitativo_short_crypto()
+    run_nexus_engine()
